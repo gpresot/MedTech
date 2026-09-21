@@ -1,2 +1,2 @@
 # MedTech
-Trabalho final da disciplina Programação Modular
+Trabalho prático da disciplina Programação Modular
