@@ -9,25 +9,77 @@
 </head>
 
 <body>
-<div class="login-container">
-    <div class="login-image-logo-container">
-        <img th:src="@{/images/logo.png}" alt="Logo MedTech">
+    <div class="login-container">
+        <!-- =====================================================
+             LOGO MedTech MINAS
+             ===================================================== -->
+
+        <div class="login-image-logo-container">
+            <img th:src="@{/images/logo.png}" alt="Logo MedTech Minas" />
+        </div>
+
+        <!-- =====================================================
+             FORMULÁRIO
+             ===================================================== -->
+
+        <div class="login-form">
+            <form th:action="@{/login}" method="post" class="login-form-content">
+                <h4 class="login-title">Login</h4>
+
+                <!-- =================================================
+                     CADASTRO REALIZADO
+                     ================================================= -->
+
+                <div th:if="${param.cadastro}" class="login-message">
+                    <strong> Cadastro realizado com sucesso! </strong>
+
+                    <span> Agora você já pode fazer login. </span>
+                </div>
+
+                <!-- =================================================
+                     ERRO CAPTCHA
+                     ================================================= -->
+
+                <div th:if="${param.captcha}" class="login-error">
+                    Por favor, confirme que você não é um robô.
+                </div>
+
+                <!-- =================================================
+                     USUÁRIO
+                     ================================================= -->
+
+                <input type="text" id="username" name="username" placeholder="Username" autocomplete="username"
+                    required />
+
+                <!-- =================================================
+                     SENHA
+                     ================================================= -->
+
+                <input type="password" id="password" name="password" placeholder="Senha" autocomplete="current-password"
+                    required />
+
+                <!-- =================================================
+                     GOOGLE reCAPTCHA
+                     ================================================= -->
+
+                <div class="recaptcha-container">
+                    <div class="g-recaptcha" th:attr="data-sitekey=${recaptchaSiteKey}"></div>
+                </div>
+
+                <!-- =================================================
+                     BOTÃO
+                     ================================================= -->
+
+                <div class="login-button-container">
+                    <button type="submit">Entrar</button>
+                </div>
+                <p class="login-redirect-options">
+                    Falha ao efetuar o Login!<br>
+                    <a th:href="@{/register}">Cadastre-se</a> |
+                </p>
+            </form>
+        </div>
     </div>
-    <div class="login-form">
-        <form th:action="@{/login}" method="post" class="login-form">
-            <h4 class="login-title">Login</h4>
-            <input type="text" id="username" name="username" placeholder="Username" required>
-            <input type="password" id="password" name="password" placeholder="Senha" required>
-            <div class="login-button-container">
-                <button type="submit">Entrar</button>
-            </div>
-            <p class="login-redirect-options">
-                Falha ao efetuar o Login!<br>
-                <a th:href="@{/register}">Cadastre-se</a> |
-            </p>
-        </form>
-    </div>
-</div>
 </body>
 
 </html>

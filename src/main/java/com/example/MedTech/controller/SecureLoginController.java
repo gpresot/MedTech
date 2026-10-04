@@ -43,12 +43,8 @@ public class SecureLoginController {
             @RequestParam("instituicao") String instituicao,
             @RequestParam("senha") String senha) {
 
-        // Aqui você pode adicionar lógica para salvar os dados do usuário, por exemplo:
-        // userService.saveUser(new User(nome, email, cpf, rg, endereco, instituicao, senha));
-
-        // Redirecionar ou exibir uma mensagem de sucesso
         System.out.println("Registro: Redirecionado para a página de login.");
-        return "redirect:/login"; // Após o registro, redirecionar para a página de login
+        return "redirect:/login";
     }
 
     @GetMapping("/recoverpassword")
@@ -60,11 +56,17 @@ public class SecureLoginController {
     public String handleRecoverPassword(
             @RequestParam("email") String email) {
 
-        // Aqui você pode adicionar lógica para recuperar a senha.
-        // userService.recoverPassword(email);
-
-        // Redirecionar ou exibir uma mensagem de sucesso
         System.out.println("Recuperação de E-mail: Redirecionado para a página de login.");
-        return "redirect:/login"; // Após a recuperação de senha, redirecionar para a página de login
+        return "redirect:/login";
     }
+
+    @GetMapping("/perfil/paciente")
+    public String perfilPaciente() {
+        return "perfil-paciente";
+    }
+    @GetMapping("/perfil/doutor")
+    public String perfilDoutor() {
+        return "perfil-doutor";
+    }
+
 }

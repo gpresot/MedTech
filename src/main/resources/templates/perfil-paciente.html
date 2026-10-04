@@ -1,0 +1,159 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Perfil do Paciente - MedTech</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" th:href="@{/css/perfil.css}" />
+</head>
+
+<body>
+
+    <!-- CABEÇALHO -->
+
+    <header class="perfil-header">
+
+        <div class="perfil-logo">
+            <img th:src="@{/images/logo.png}" alt="Logo MedTech Minas" />
+        </div>
+
+        <nav class="perfil-nav">
+            <a href="/home">Início</a>
+            <a href="/login">Sair</a>
+        </nav>
+
+    </header>
+
+
+    <!-- CONTEÚDO PRINCIPAL -->
+
+    <main class="perfil-container">
+
+        <h1 class="perfil-title">
+            Perfil do Paciente
+        </h1>
+
+
+        <!-- IDENTIFICAÇÃO DO PACIENTE -->
+
+        <section class="perfil-identificacao">
+
+            <div class="perfil-foto">
+                <span>👤</span>
+            </div>
+
+            <div class="perfil-nome">
+
+                <h2 th:text="${paciente.nome}">
+                    Nome do paciente
+                </h2>
+
+                <p>
+                    Paciente
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- INFORMAÇÕES PESSOAIS -->
+
+        <section class="perfil-card">
+
+            <h2>
+                Informações pessoais
+            </h2>
+
+            <div class="perfil-info-grid">
+
+                <div class="perfil-info">
+                    <span>Nome</span>
+
+                    <strong th:text="${paciente.nome}">
+                        Nome do paciente
+                    </strong>
+                </div>
+
+
+                <div class="perfil-info">
+                    <span>CPF</span>
+
+                    <strong th:text="${paciente.cpf}">
+                        CPF do paciente
+                    </strong>
+                </div>
+
+
+                <div class="perfil-info">
+                    <span>Data de nascimento</span>
+
+                    <strong th:text="${paciente.dataNascimento}">
+                        Data de nascimento
+                    </strong>
+                </div>
+
+
+                <div class="perfil-info">
+                    <span>Telefone</span>
+
+                    <strong th:text="${paciente.telefone}">
+                        Telefone do paciente
+                    </strong>
+                </div>
+
+
+                <div class="perfil-info">
+                    <span>E-mail</span>
+
+                    <strong th:text="${paciente.email}">
+                        E-mail do paciente
+                    </strong>
+                </div>
+
+
+                <div class="perfil-info">
+                    <span>Endereço</span>
+
+                    <strong th:text="${paciente.endereco}">
+                        Endereço do paciente
+                    </strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- AÇÕES -->
+
+        <section class="perfil-acoes">
+
+            <button type="button" class="perfil-button perfil-button-primary">
+                Editar perfil
+            </button>
+
+            <button type="button" class="perfil-button">
+                Ver consultas
+            </button>
+
+            <button type="button" class="perfil-button">
+                Histórico médico
+            </button>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>
