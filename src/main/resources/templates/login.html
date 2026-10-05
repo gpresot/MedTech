@@ -48,7 +48,8 @@
 
           <span> Agora você já pode fazer login. </span>
         </div>
-
+          <div th:if="${registerSuccess}" th:text="${registerSuccess}" class="login-message"></div>
+          <div th:if="${param.error}" class="login-error">Usuário ou senha inválidos.</div>
         <!-- =================================================
                      ERRO CAPTCHA
                      ================================================= -->
@@ -61,7 +62,7 @@
                      USUÁRIO
                      ================================================= -->
 
-        <input type="text" id="username" name="username" placeholder="Username" autocomplete="username" required />
+        <input type="email" id="username" name="username" placeholder="E-mail" autocomplete="username" required />
 
         <!-- =================================================
                      SENHA
@@ -95,7 +96,7 @@
 
           <br />
 
-          <a href="/register"> Cadastre-se </a>
+          <a href="/home"> Cadastre-se </a>
 
           <span>|</span>
 

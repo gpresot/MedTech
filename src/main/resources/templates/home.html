@@ -1,18 +1,26 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
 
 <head>
-    <title>Home</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTech</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 
 <body>
     <div class="home-container">
-        <h2>Bem-vindo à página inicial!</h2>
-        <p class="home-message">Login realizado com sucesso.</p>
-        <form th:action="@{/logout}" method="post" style="margin-top: 20px;">
-            <button type="submit" class="home-btn">Sair</button>
-        </form>
+        <h2>Bem-vindo ao MedTech</h2>
+        <p class="home-message">Como você quer se cadastrar?</p>
+
+        <div>
+            <a th:href="@{/register/paciente}" class="home-btn"
+               style="text-decoration:none; display:inline-block;">Sou paciente</a>
+            <a th:href="@{/register/doutor}" class="home-btn"
+               style="text-decoration:none; display:inline-block;">Sou doutor</a>
+        </div>
+
+        <p class="home-message">Já tem conta? <a th:href="@{/login}">Faça login</a></p>
     </div>
 </body>
 
