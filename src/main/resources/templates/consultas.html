@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultas - MedTech</title>
+    <link rel="stylesheet" href="../static/css/style02.css">
+</head>
+<body>
+
+<header>
+    <h1>MedTech</h1>
+    <nav>
+        <a href="#">Home</a>
+        <a href="consultas.html">Consultas</a>
+        <a href="internacoes.html">Internações</a>
+        <a href="#">Perfil</a>
+    </nav>
+</header>
+
+<main>
+
+    <section class="caixa">
+        <h2>Agendar Consulta</h2>
+
+        <form>
+            <label>Paciente</label>
+            <input type="text" placeholder="Nome do paciente">
+
+            <label>Profissional</label>
+            <select>
+                <option>Selecione um profissional</option>
+                <option>Dr. Carlos Silva</option>
+                <option>Dra. Ana Souza</option>
+                <option>Dr. Rafael Lima</option>
+            </select>
+
+            <label>Especialidade</label>
+            <select>
+                <option>Selecione a especialidade</option>
+                <option>Clínico Geral</option>
+                <option>Cardiologia</option>
+                <option>Ortopedia</option>
+            </select>
+
+            <div class="linha">
+                <div>
+                    <label>Data</label>
+                    <input type="date">
+                </div>
+
+                <div>
+                    <label>Horário</label>
+                    <input type="time">
+                </div>
+            </div>
+
+            <label>Motivo da consulta</label>
+            <input type="text" placeholder="Digite o motivo">
+
+            <label>Observações</label>
+            <textarea placeholder="Observações"></textarea>
+
+            <button type="button">Agendar Consulta</button>
+        </form>
+    </section>
+
+    <section class="caixa">
+        <h2>Consultas Agendadas</h2>
+
+        <table>
+            <tr>
+                <th>Paciente</th>
+                <th>Profissional</th>
+                <th>Especialidade</th>
+                <th>Data</th>
+                <th>Horário</th>
+                <th>Status</th>
+            </tr>
+
+            <tr>
+                <td>João Silva</td>
+                <td>Dr. Carlos Silva</td>
+                <td>Cardiologia</td>
+                <td>08/10/2026</td>
+                <td>14:00</td>
+                <td>Agendada</td>
+            </tr>
+
+            <tr>
+                <td>Maria Oliveira</td>
+                <td>Dra. Ana Souza</td>
+                <td>Clínico Geral</td>
+                <td>10/10/2026</td>
+                <td>09:30</td>
+                <td>Agendada</td>
+            </tr>
+        </table>
+    </section>
+
+</main>
+
+<footer>
+    <p>MedTech - Sistema Hospitalar</p>
+</footer>
+
+</body>
+</html>
