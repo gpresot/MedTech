@@ -1,5 +1,6 @@
 package com.example.MedTech.service;
 
+import com.example.MedTech.enums.Especialidade;
 import com.example.MedTech.model.Profissional;
 import com.example.MedTech.repository.ProfissionalRepository;
 
@@ -32,4 +33,9 @@ public class ProfissionalService {
     public void excluir(Long id) {
         profissionalRepository.deleteById(id);
     }
+
+    public List<Profissional> buscarPorEspecialidade(Especialidade especialidade){
+        return profissionalRepository.findByEspecialidade(especialidade);
+    }
+
 }

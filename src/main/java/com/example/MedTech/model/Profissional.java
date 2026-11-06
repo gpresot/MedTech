@@ -17,11 +17,9 @@ public abstract class Profissional {
     private String telefone;
     private String crm;
 
-    // Construtor vazio
     public Profissional() {
     }
 
-    // Construtor completo
     public Profissional( String nome, String cpf,
                         String email, String telefone, String crm) {
         this.nome = nome;
@@ -31,7 +29,6 @@ public abstract class Profissional {
         this.crm = crm;
     }
 
-    // Getters e Setters
     public Long getId() {
         return id;
     }

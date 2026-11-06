@@ -14,24 +14,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/home", "/register", "/register/**",
-                 "/css/**", "/images/**", "/error").permitAll().requestMatchers("/perfil/paciente").hasRole("PACIENTE")
-  .requestMatchers("/perfil/doutor").hasRole("DOUTOR")
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-            .loginPage("/login")
-            .successHandler((request, response, authentication) -> {
-                boolean doutor = authentication.getAuthorities().stream()
-                        .anyMatch(a -> a.getAuthority().equals("ROLE_DOUTOR"));
-                response.sendRedirect(doutor ? "/perfil/doutor" : "/perfil/paciente");
-            })
-            .failureUrl("/login?error")
-            .permitAll()
-)
-            
-            .logout(logout -> logout.logoutSuccessUrl("/login?logout"));
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/profissionais/**"))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/login", "/home", "/register", "/register/**",
+                                "/css/**", "/images/**", "/error")
+                        .permitAll()
+
+                        .requestMatchers("/profissionais/**").permitAll()
+
+                        .requestMatchers("/perfil/paciente").hasRole("PACIENTE")
+                        .requestMatchers("/perfil/doutor").hasRole("DOUTOR")
+
+                        .anyRequest().authenticated())
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .successHandler((request, response, authentication) -> {
+                            boolean doutor = authentication.getAuthorities().stream()
+                                    .anyMatch(a -> a.getAuthority().equals("ROLE_DOUTOR"));
+                            response.sendRedirect(doutor ? "/perfil/doutor" : "/perfil/paciente");
+                        })
+                        .failureUrl("/login?error")
+                        .permitAll())
+
+                .logout(logout -> logout.logoutSuccessUrl("/login?logout"));
 
         return http.build();
     }

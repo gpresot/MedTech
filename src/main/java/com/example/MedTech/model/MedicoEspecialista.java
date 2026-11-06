@@ -2,9 +2,11 @@ package com.example.MedTech.model;
 
 import com.example.MedTech.enums.Especialidade;
 import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 
+@Entity 
 @DiscriminatorValue("ESPECIALISTA")
 public class MedicoEspecialista extends Profissional {
 

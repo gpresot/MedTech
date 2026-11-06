@@ -1,10 +1,19 @@
 package com.example.MedTech.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import com.example.MedTech.model.Profissional;
+import java.util.List;
 
-@Repository 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import com.example.MedTech.model.Profissional;
+import com.example.MedTech.enums.Especialidade;
+
+@Repository
 public interface ProfissionalRepository extends JpaRepository<Profissional, Long> {
+
+    @Query("SELECT m FROM MedicoEspecialista m WHERE m.especialidade = :especialidade")
+    List<Profissional> findByEspecialidade(@Param("especialidade") Especialidade especialidade);
 
 }
