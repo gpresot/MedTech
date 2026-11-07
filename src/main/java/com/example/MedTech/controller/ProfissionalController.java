@@ -15,7 +15,6 @@ import com.example.MedTech.service.ProfissionalService;
 
 import jakarta.validation.Valid;
 
-
 @RestController
 @RequestMapping("/profissionais")
 public class ProfissionalController {
@@ -39,7 +38,7 @@ public class ProfissionalController {
     }
 
     @PostMapping
-    public Profissional cadastrar(@Valid  @RequestBody ProfissionalDTO dto) {
+    public Profissional cadastrar(@Valid @RequestBody ProfissionalDTO dto) {
         Profissional profissional = ProfissionalFactory.criar(dto);
         return profissionalService.salvar(profissional);
     }
@@ -54,21 +53,30 @@ public class ProfissionalController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Profissional> atualizar(@PathVariable Long id, @Valid  @RequestBody ProfissionalDTO dto) {
+    public ResponseEntity<Profissional> atualizar(
+            @PathVariable Long id,
+            @RequestBody ProfissionalDTO dto) {
+
         var profissionalExistente = profissionalService.buscarPorId(id);
+
         if (profissionalExistente.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
         Profissional profissional = profissionalExistente.get();
+
         profissional.setNome(dto.getNome());
         profissional.setCpf(dto.getCpf());
         profissional.setEmail(dto.getEmail());
         profissional.setTelefone(dto.getTelefone());
         profissional.setCrm(dto.getCrm());
+
         if (profissional instanceof MedicoEspecialista especialista) {
             especialista.setEspecialidade(dto.getEspecialidade());
         }
+
         Profissional atualizado = profissionalService.salvar(profissional);
+
         return ResponseEntity.ok(atualizado);
     }
 
@@ -77,5 +85,5 @@ public class ProfissionalController {
         List<Profissional> profissionais = profissionalService.buscarPorEspecialidade(especialidade);
         return ResponseEntity.ok(profissionais);
     }
-    
+
 }

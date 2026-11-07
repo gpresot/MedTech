@@ -1,0 +1,224 @@
+
+/* ========================================
+   CONFIGURAÇÕES GERAIS
+======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #F8FAFC;
+    color: #00334F;
+}
+
+/* ========================================
+   CONTEÚDO PRINCIPAL
+======================================== */
+
+.container {
+    width: 90%;
+    max-width: 1400px;
+    margin: 40px auto;
+}
+
+/* ========================================
+   CABEÇALHO
+======================================== */
+
+.cabecalho {
+    margin-bottom: 30px;
+}
+
+.cabecalho h1 {
+    color: #005380;
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.cabecalho p {
+    color: #526477;
+    font-size: 16px;
+}
+
+/* ========================================
+   AÇÕES
+======================================== */
+
+.acoes {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 25px;
+}
+
+.botao {
+    display: inline-block;
+    background-color: #005380;
+    color: #FFFFFF;
+    padding: 11px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.botao:hover {
+    background-color: #00334F;
+}
+
+/* ========================================
+   LISTA DE PROFISSIONAIS
+======================================== */
+
+.lista-profissionais {
+    background-color: #FFFFFF;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 51, 79, 0.08);
+}
+
+.lista-profissionais h2 {
+    color: #005380;
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+/* Mensagem quando não existem profissionais */
+
+.lista-profissionais > div > p {
+    color: #526477;
+    padding: 20px 0;
+}
+
+/* ========================================
+   TABELA
+======================================== */
+
+.tabela-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+thead {
+    background-color: #E8F3F9;
+}
+
+th {
+    color: #00334F;
+    font-weight: 700;
+    text-align: left;
+    padding: 15px 12px;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+td {
+    color: #526477;
+    padding: 14px 12px;
+    border-bottom: 1px solid #E5EAF0;
+    font-size: 14px;
+}
+
+tbody tr:hover {
+    background-color: #F8FAFC;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ========================================
+   BOTÃO EXCLUIR
+======================================== */
+
+.botao-excluir {
+    display: inline-block;
+    background-color: #DC3545;
+    color: #FFFFFF;
+    padding: 9px 13px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.botao-excluir:hover {
+    background-color: #B02A37;
+}
+
+/* Espaçamento entre os botões de ação */
+
+td .botao {
+    margin-right: 5px;
+    padding: 9px 13px;
+    font-size: 13px;
+}
+
+/* ========================================
+   RESPONSIVIDADE
+======================================== */
+
+@media (max-width: 768px) {
+
+    .container {
+        width: 94%;
+        margin: 25px auto;
+    }
+
+    .cabecalho h1 {
+        font-size: 26px;
+    }
+
+    .lista-profissionais {
+        padding: 18px;
+    }
+
+    .lista-profissionais h2 {
+        font-size: 19px;
+    }
+
+    .acoes {
+        justify-content: flex-start;
+    }
+
+}
+
+@media (max-width: 480px) {
+
+    .container {
+        width: 92%;
+        margin: 20px auto;
+    }
+
+    .cabecalho h1 {
+        font-size: 23px;
+    }
+
+    .cabecalho p {
+        font-size: 14px;
+    }
+
+    .lista-profissionais {
+        padding: 14px;
+    }
+
+    .botao {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+}

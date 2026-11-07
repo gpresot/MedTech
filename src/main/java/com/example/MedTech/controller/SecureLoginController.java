@@ -1,36 +1,53 @@
+
 package com.example.MedTech.controller;
 
-import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.security.core.userdetails.User;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.example.MedTech.enums.TipoUsuario;
+import com.example.MedTech.model.Usuario;
+import com.example.MedTech.model.Profissional;
+import com.example.MedTech.repository.UsuarioRepository;
+import com.example.MedTech.repository.ProfissionalRepository;
+import com.example.MedTech.service.CadastroService;
 
 @Controller
 public class SecureLoginController {
 
-    private static final String EMAIL_REGEX = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
+    private static final String EMAIL_REGEX =
+            "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
 
-    private final InMemoryUserDetailsManager userDetailsManager;
     private final PasswordEncoder passwordEncoder;
+    private final CadastroService cadastroService;
+    private final UsuarioRepository usuarioRepository;
+    private final ProfissionalRepository profissionalRepository;
 
-    // Dados do cadastro, na memória. A chave é o e-mail.
-    // Somem quando a aplicação reinicia (igual aos usuários).
-    private final Map<String, Map<String, String>> dadosUsuarios = new ConcurrentHashMap<>();
+    // Dados complementares do paciente ainda temporários.
+    private final Map<String, Map<String, String>> dadosUsuarios =
+            new ConcurrentHashMap<>();
 
-    public SecureLoginController(InMemoryUserDetailsManager userDetailsManager,
-                                 PasswordEncoder passwordEncoder) {
-        this.userDetailsManager = userDetailsManager;
+    public SecureLoginController(
+            PasswordEncoder passwordEncoder,
+            CadastroService cadastroService,
+            UsuarioRepository usuarioRepository,
+            ProfissionalRepository profissionalRepository) {
+
         this.passwordEncoder = passwordEncoder;
+        this.cadastroService = cadastroService;
+        this.usuarioRepository = usuarioRepository;
+        this.profissionalRepository = profissionalRepository;
     }
 
     // ---------- PÁGINAS ----------
@@ -38,11 +55,6 @@ public class SecureLoginController {
     @GetMapping("/login")
     public String login() {
         return "login";
-    }
-
-    @GetMapping("/error")
-    public String error() {
-        return "error";
     }
 
     @GetMapping("/home")
@@ -65,7 +77,7 @@ public class SecureLoginController {
         return "register-doutor";
     }
 
-    // ---------- CADASTRO ----------
+    // ---------- CADASTRO DE PACIENTE ----------
 
     @PostMapping("/register/paciente")
     public String handleRegisterPaciente(
@@ -78,8 +90,18 @@ public class SecureLoginController {
             @RequestParam("senha") String senha,
             RedirectAttributes ra) {
 
-        if (cpf.isBlank() || dataNascimento.isBlank() || endereco.isBlank()) {
-            return erro(ra, "Preencha todos os campos obrigatórios.", "/register/paciente");
+        if (cpf.isBlank() || dataNascimento.isBlank()
+                || endereco.isBlank()) {
+
+            return erro(ra, "Preencha todos os campos obrigatórios.",
+                    "/register/paciente");
+        }
+
+        if (cpf.length() != 11
+                || !cpf.chars().allMatch(Character::isDigit)) {
+
+            return erro(ra, "O CPF deve possuir 11 números.",
+                    "/register/paciente");
         }
 
         Map<String, String> extras = new HashMap<>();
@@ -87,12 +109,17 @@ public class SecureLoginController {
         extras.put("dataNascimento", dataNascimento);
         extras.put("endereco", endereco);
 
-        return criarConta("PACIENTE", nome, email, telefone, senha, extras, ra, "/register/paciente");
+        return criarConta(
+                "PACIENTE", nome, email, telefone, senha,
+                extras, ra, "/register/paciente");
     }
+
+    // ---------- CADASTRO DE DOUTOR ----------
 
     @PostMapping("/register/doutor")
     public String handleRegisterDoutor(
             @RequestParam("nome") String nome,
+            @RequestParam("cpf") String cpf,
             @RequestParam("especialidade") String especialidade,
             @RequestParam("registroProfissional") String registroProfissional,
             @RequestParam("telefone") String telefone,
@@ -100,93 +127,214 @@ public class SecureLoginController {
             @RequestParam("senha") String senha,
             RedirectAttributes ra) {
 
-        if (especialidade.isBlank() || registroProfissional.isBlank()) {
-            return erro(ra, "Preencha todos os campos obrigatórios.", "/register/doutor");
+        if (nome.isBlank() || cpf.isBlank()
+                || especialidade.isBlank()
+                || registroProfissional.isBlank()
+                || telefone.isBlank() || email.isBlank()
+                || senha.isBlank()) {
+
+            return erro(ra, "Preencha todos os campos obrigatórios.",
+                    "/register/doutor");
         }
 
-        Map<String, String> extras = new HashMap<>();
-        extras.put("especialidade", especialidade);
-        extras.put("registroProfissional", registroProfissional);
+        if (cpf.length() != 11
+                || !cpf.chars().allMatch(Character::isDigit)) {
 
-        return criarConta("DOUTOR", nome, email, telefone, senha, extras, ra, "/register/doutor");
+            return erro(ra, "O CPF deve possuir 11 números.",
+                    "/register/doutor");
+        }
+
+        String emailNormalizado = email.trim().toLowerCase();
+
+        if (!emailNormalizado.matches(EMAIL_REGEX)) {
+            return erro(ra, "Informe um e-mail válido.", "/register/doutor");
+        }
+
+        if (senha.length() < 8) {
+            return erro(ra, "A senha deve possuir pelo menos 8 caracteres.",
+                    "/register/doutor");
+        }
+
+        try {
+            cadastroService.cadastrarDoutor(
+                    nome,
+                    cpf,
+                    especialidade,
+                    registroProfissional,
+                    telefone,
+                    emailNormalizado,
+                    senha);
+
+        } catch (IllegalArgumentException e) {
+            return erro(ra, e.getMessage(), "/register/doutor");
+        }
+
+        ra.addFlashAttribute(
+                "registerSuccess",
+                "Cadastro realizado com sucesso! Agora você pode fazer login.");
+
+        return "redirect:/login";
     }
 
-    // Parte comum aos dois cadastros.
-    private String criarConta(String role, String nome, String email, String telefone,
-                              String senha, Map<String, String> extras,
-                              RedirectAttributes ra, String paginaErro) {
+    // ---------- CADASTRO DE CONTA NO BANCO ----------
+
+    private String criarConta(
+            String role,
+            String nome,
+            String email,
+            String telefone,
+            String senha,
+            Map<String, String> extras,
+            RedirectAttributes ra,
+            String paginaErro) {
 
         String e = email.trim().toLowerCase();
 
-        if (nome.isBlank() || e.isBlank() || telefone.isBlank() || senha.isBlank()) {
-            return erro(ra, "Preencha todos os campos obrigatórios.", paginaErro);
+        if (nome.isBlank() || e.isBlank()
+                || telefone.isBlank() || senha.isBlank()) {
+
+            return erro(ra, "Preencha todos os campos obrigatórios.",
+                    paginaErro);
         }
+
         if (!e.matches(EMAIL_REGEX)) {
             return erro(ra, "Informe um e-mail válido.", paginaErro);
         }
+
         if (senha.length() < 8) {
-            return erro(ra, "A senha deve possuir pelo menos 8 caracteres.", paginaErro);
-        }
-        if (userDetailsManager.userExists(e)) {
-            return erro(ra, "Já existe uma conta cadastrada com este e-mail.", paginaErro);
+            return erro(ra, "A senha deve possuir pelo menos 8 caracteres.",
+                    paginaErro);
         }
 
-        userDetailsManager.createUser(
-                User.withUsername(e)
-                        .password(passwordEncoder.encode(senha))
-                        .roles(role)
-                        .build());
+        if (usuarioRepository.existsByEmail(e)) {
+            return erro(ra, "Já existe uma conta cadastrada com este e-mail.",
+                    paginaErro);
+        }
 
-        // Todas as chaves existem sempre, porque o template falha
-        // se pedir uma chave que não está no Map.
+        Usuario usuario = new Usuario(
+                e,
+                passwordEncoder.encode(senha),
+                TipoUsuario.valueOf(role));
+
+        usuarioRepository.save(usuario);
+
         Map<String, String> dados = dadosVazios(e);
         dados.put("nome", valor(nome));
         dados.put("telefone", valor(telefone));
+
         extras.forEach((chave, v) -> dados.put(chave, valor(v)));
+
         dadosUsuarios.put(e, dados);
 
-        ra.addFlashAttribute("registerSuccess",
+        ra.addFlashAttribute(
+                "registerSuccess",
                 "Cadastro realizado com sucesso! Agora você pode fazer login.");
+
         return "redirect:/login";
     }
 
     // ---------- PERFIS ----------
 
     @GetMapping("/perfil/paciente")
-    public String perfilPaciente() {
+    public String perfilPaciente(Model model) {
+
+        model.addAttribute("paginaAtual", "perfil");
 
         return "perfil-paciente";
     }
 
     @GetMapping("/perfil/doutor")
-    public String perfilDoutor() {
-        
+    public String perfilDoutor(
+            Authentication authentication,
+            Model model) {
+
+        String email = authentication.getName();
+
+        Profissional profissional = profissionalRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Profissional não encontrado para este usuário."));
+
+        model.addAttribute("profissional", profissional);
+        model.addAttribute("paginaAtual", "perfil");
+
         return "perfil-doutor";
     }
 
     // ---------- AUXILIARES ----------
 
     private Map<String, String> dadosDe(String email) {
+
         Map<String, String> dados = dadosUsuarios.get(email);
+
         return dados != null ? dados : dadosVazios(email);
     }
 
     private Map<String, String> dadosVazios(String email) {
+
         Map<String, String> vazio = new HashMap<>();
-        for (String chave : new String[] { "nome", "cpf", "dataNascimento", "telefone",
-                "endereco", "especialidade", "registroProfissional" }) {
+
+        for (String chave : new String[]{
+                "nome", "cpf", "dataNascimento", "telefone",
+                "endereco", "especialidade", "registroProfissional"
+        }) {
             vazio.put(chave, "—");
         }
+
         vazio.put("email", email);
+
         return vazio;
     }
 
-    private String erro(RedirectAttributes ra, String mensagem, String pagina) {
+    private String erro(
+            RedirectAttributes ra,
+            String mensagem,
+            String pagina) {
+
         ra.addFlashAttribute("registerError", mensagem);
+
         return "redirect:" + pagina;
     }
 
     private String valor(String s) {
+
         return (s == null || s.isBlank()) ? "—" : s.trim();
+    }
+
+    // ---------- CONSULTAS E INTERNAÇÕES ----------
+
+    @GetMapping("/consultas")
+    public String consultas(
+            Authentication authentication,
+            Model model) {
+
+        System.out.println("ACESSANDO CONSULTAS");
+
+        if (authentication != null) {
+            System.out.println("USUARIO: " + authentication.getName());
+            System.out.println("AUTENTICADO: " + authentication.isAuthenticated());
+        } else {
+            System.out.println("USUARIO NAO AUTENTICADO");
+        }
+
+        model.addAttribute("paginaAtual", "consultas");
+
+        return "consultas";
+    }
+
+    @GetMapping("/internacoes")
+    public String internacoes(Model model) {
+
+        model.addAttribute("paginaAtual", "internacoes");
+
+        return "internacoes";
+    }
+
+    // ---------- CADASTRAR PROFISSIONAL ----------
+
+    @GetMapping("/profissionais/cadastrar")
+    public String cadastrarProfissional() {
+
+        return "cadastrar-profissional";
     }
 }

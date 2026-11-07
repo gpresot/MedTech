@@ -1,27 +1,81 @@
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedTech</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <title>MedTech - Bem-vindo</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
 </head>
 
 <body>
-    <div class="home-container">
-        <h2>Bem-vindo ao MedTech</h2>
-        <p class="home-message">Como você quer se cadastrar?</p>
 
-        <div>
-            <a th:href="@{/register/paciente}" class="home-btn"
-               style="text-decoration:none; display:inline-block;">Sou paciente</a>
-            <a th:href="@{/register/doutor}" class="home-btn"
-               style="text-decoration:none; display:inline-block;">Sou doutor</a>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="home-container">
+
+        <div class="home-logo">
+            <img th:src="@{/images/logo.png}" alt="Logo MedTech">
         </div>
 
-        <p class="home-message">Já tem conta? <a th:href="@{/login}">Faça login</a></p>
-    </div>
-</body>
+        <section class="home-content">
 
+            <span class="home-tag">SAÚDE E TECNOLOGIA</span>
+
+            <h1>Bem-vindo ao <span>MedTech</span></h1>
+
+            <p class="home-description">
+                Uma plataforma desenvolvida para conectar pacientes
+                e profissionais da saúde em um só lugar.
+            </p>
+
+            <div class="home-divider"></div>
+
+            <h2>Como você deseja continuar?</h2>
+
+            <p class="home-instruction">
+                Escolha uma opção para criar sua conta.
+            </p>
+
+            <div class="home-actions">
+
+                <a th:href="@{/register/paciente}" class="home-btn">
+                    <span class="home-btn-title">Sou paciente</span>
+                    <span class="home-btn-description">
+                        Quero acessar os serviços de saúde.
+                    </span>
+                </a>
+
+                <a th:href="@{/register/doutor}" class="home-btn">
+                    <span class="home-btn-title">Sou profissional</span>
+                    <span class="home-btn-description">
+                        Quero fazer parte da equipe médica.
+                    </span>
+                </a>
+
+            </div>
+
+            <p class="home-login">
+                Já possui uma conta?
+                <a th:href="@{/login}">Faça login</a>
+            </p>
+
+        </section>
+
+        <footer class="home-footer">
+            MedTech Minas · Tecnologia a serviço da saúde
+        </footer>
+
+    </main>
+
+</body>
 </html>

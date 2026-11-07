@@ -14,7 +14,7 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
 
-  <!-- CSS -->
+  <link rel="stylesheet" th:href="@{/css/navbar.css}" />
   <link rel="stylesheet" th:href="@{/css/login.css}" />
 
   <!-- Google reCAPTCHA -->
@@ -22,6 +22,8 @@
 </head>
 
 <body>
+  <div th:replace="~{fragments/navbar :: navbar}"></div>
+
   <div class="login-container">
     <!-- =====================================================
              LOGO MedTech MINAS
@@ -48,8 +50,8 @@
 
           <span> Agora você já pode fazer login. </span>
         </div>
-          <div th:if="${registerSuccess}" th:text="${registerSuccess}" class="login-message"></div>
-          <div th:if="${param.error}" class="login-error">Usuário ou senha inválidos.</div>
+        <div th:if="${registerSuccess}" th:text="${registerSuccess}" class="login-message"></div>
+        <div th:if="${param.error}" class="login-error">Usuário ou senha inválidos.</div>
         <!-- =================================================
                      ERRO CAPTCHA
                      ================================================= -->

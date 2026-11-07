@@ -4,16 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Paciente</title>
+
+    <title>Registro de Paciente - MedTech</title>
+
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/register.css}">
 </head>
 
 <body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
 <div class="register-container">
     <div class="register-image-logo-container">
         <img th:src="@{/images/logo.png}" alt="Logo MedTech">
     </div>
-    <div class="register-form">
+    <div class="register-form-area">
         <form th:action="@{/register/paciente}" method="post" class="register-form">
             <h4 class="register-title">Registro de Paciente</h4>
             <div th:if="${registerError}" th:text="${registerError}" style="color:red;"></div>

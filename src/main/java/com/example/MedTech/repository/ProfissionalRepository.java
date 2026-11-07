@@ -1,6 +1,8 @@
+
 package com.example.MedTech.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +16,8 @@ import com.example.MedTech.enums.Especialidade;
 public interface ProfissionalRepository extends JpaRepository<Profissional, Long> {
 
     @Query("SELECT m FROM MedicoEspecialista m WHERE m.especialidade = :especialidade")
-    List<Profissional> findByEspecialidade(@Param("especialidade") Especialidade especialidade);
+    List<Profissional> findByEspecialidade(
+            @Param("especialidade") Especialidade especialidade);
 
+    Optional<Profissional> findByEmail(String email);
 }

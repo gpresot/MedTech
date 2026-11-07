@@ -1,3 +1,4 @@
+
 * {
     margin: 0;
     padding: 0;
@@ -5,321 +6,169 @@
 }
 
 body {
-    font-family: "Montserrat", sans-serif;
-    background-color: #f5f7fa;
-    color: #333;
+    font-family: 'Montserrat', sans-serif;
+    background-color: #F8FAFC;
+    color: #00334F;
+    min-height: 100vh;
 }
-
-
-/*
-   CABEÇALHO
-*/
-
-.perfil-header {
-    width: 100%;
-    height: 80px;
-
-    background-color: #1769aa;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 0 50px;
-
-    border-bottom: 1px solid #e5e5e5;
-}
-
-
-/*
-   LOGO
-   */
-
-.perfil-logo img {
-    width: 150px;
-    height: auto;
-}
-
-
-/*
-   MENU
-   */
-
-.perfil-nav {
-    display: flex;
-    align-items: center;
-
-    gap: 30px;
-}
-
-.perfil-nav a {
-    text-decoration: none;
-
-    color: #fafafa;
-
-    font-size: 14px;
-    font-weight: 500;
-
-    transition: 0.2s;
-}
-
-.perfil-nav a:hover {
-    color: #07d8d2;
-}
-
-
-/*
-   CONTAINER PRINCIPAL
-   */
 
 .perfil-container {
     width: 90%;
     max-width: 1000px;
-
     margin: 45px auto;
 }
 
-
-/*
-   TÍTULO
-   */
-
 .perfil-title {
-    font-size: 26px;
-    font-weight: 600;
-
+    color: #005380;
+    font-size: 28px;
     margin-bottom: 30px;
-
-    color: #222;
 }
-
-
-/*
-   IDENTIFICAÇÃO
-   */
 
 .perfil-identificacao {
-    background-color: #ffffff;
-
     display: flex;
     align-items: center;
-
-    gap: 20px;
-
+    gap: 22px;
     padding: 25px;
-
-    border-radius: 10px;
-
     margin-bottom: 25px;
-
-    border: 1px solid #e6e6e6;
+    background-color: #FFFFFF;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 51, 79, 0.08);
 }
-
-
-/*
-   FOTO
-   */
 
 .perfil-foto {
     width: 85px;
     height: 85px;
-
-    border-radius: 50%;
-
-    background-color: #eaf3f9;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
-    font-size: 40px;
+    flex-shrink: 0;
+    background-color: #E8F3F9;
+    border-radius: 50%;
+    font-size: 42px;
 }
 
-
-/*
-   NOME
-   */
-
 .perfil-nome h2 {
-    font-size: 20px;
-    font-weight: 600;
-
+    color: #00334F;
+    font-size: 22px;
     margin-bottom: 8px;
 }
 
 .perfil-nome p {
+    color: #526477;
     font-size: 14px;
-
-    color: #777;
 }
-
-
-/*
-   CARD DE INFORMAÇÕES
-   */
 
 .perfil-card {
-    background-color: #ffffff;
-
     padding: 30px;
-
-    border-radius: 10px;
-
-    border: 1px solid #e6e6e6;
+    margin-bottom: 25px;
+    background-color: #FFFFFF;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 51, 79, 0.08);
 }
-
-
-/*
-   TÍTULO DO CARD
-   */
 
 .perfil-card h2 {
-    font-size: 18px;
-    font-weight: 600;
-
+    color: #005380;
+    font-size: 21px;
     margin-bottom: 25px;
-
-    color: #222;
 }
-
-
-/*
-   GRID DAS INFORMAÇÕES
-   */
 
 .perfil-info-grid {
     display: grid;
-
     grid-template-columns: repeat(2, 1fr);
-
     gap: 25px;
 }
-
-
-/*
-   ITEM DE INFORMAÇÃO
-   */
 
 .perfil-info {
     display: flex;
     flex-direction: column;
-
-    gap: 7px;
+    gap: 8px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #E2E8F0;
+    min-width: 0;
 }
 
 .perfil-info span {
-    font-size: 12px;
-
-    color: #777;
-
-    font-weight: 500;
+    color: #526477;
+    font-size: 13px;
 }
 
 .perfil-info strong {
-    font-size: 14px;
-
-    color: #333;
-
-    font-weight: 500;
+    color: #00334F;
+    font-size: 15px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
 }
-
-
-/*
-   BOTÕES
-   */
 
 .perfil-acoes {
     display: flex;
-
     gap: 15px;
-
-    margin-top: 25px;
+    flex-wrap: wrap;
 }
 
-
 .perfil-button {
-    border: 1px solid #1769aa;
-
-    background-color: #ffffff;
-
-    color: #1769aa;
-
-    padding: 12px 20px;
-
-    border-radius: 6px;
-
-    font-family: "Montserrat", sans-serif;
-
-    font-size: 13px;
-    font-weight: 500;
-
+    padding: 13px 22px;
+    border: 1px solid #005380;
+    border-radius: 7px;
+    background-color: #FFFFFF;
+    color: #005380;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
-
     transition: 0.2s;
 }
 
-
-/*
-   HOVER DOS BOTÕES
-   */
-
 .perfil-button:hover {
-    background-color: #1769aa;
-
-    color: #ffffff;
+    background-color: #E8F3F9;
 }
 
-
-/*
-   BOTÃO PRINCIPAL
-   */
-
 .perfil-button-primary {
-    background-color: #1769aa;
-
-    color: #ffffff;
+    background-color: #005380;
+    color: #FFFFFF;
 }
 
 .perfil-button-primary:hover {
-    background-color: #125687;
+    background-color: #00334F;
 }
 
-
-/*
-   RESPONSIVIDADE
-   */
-
-@media (max-width: 700px) {
-
-    .perfil-header {
-        padding: 0 20px;
-    }
-
-
-    .perfil-nav {
-        gap: 15px;
-    }
-
-
+@media (max-width: 650px) {
     .perfil-container {
-        width: 92%;
-
-        margin: 30px auto;
+        width: 94%;
+        margin: 25px auto;
     }
 
+    .perfil-title {
+        font-size: 23px;
+    }
+
+    .perfil-identificacao {
+        padding: 20px;
+    }
+
+    .perfil-foto {
+        width: 65px;
+        height: 65px;
+        font-size: 32px;
+    }
+
+    .perfil-nome h2 {
+        font-size: 18px;
+    }
+
+    .perfil-card {
+        padding: 20px;
+    }
 
     .perfil-info-grid {
         grid-template-columns: 1fr;
+        gap: 18px;
     }
-
 
     .perfil-acoes {
         flex-direction: column;
     }
 
-
     .perfil-button {
         width: 100%;
     }
-
 }

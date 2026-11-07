@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+    <header th:fragment="navbar" class="navbar-medtech">
+
+        <div class="navbar-container">
+
+            <!-- LOGO -->
+            <a th:href="@{/home}" class="navbar-logo">
+                <img th:src="@{/images/logo.png}" alt="MedTech">
+            </a>
+
+            <!-- NAVEGAÇÃO -->
+            <nav class="navbar-links">
+
+                <a th:href="@{/home}" th:classappend="${paginaAtual == 'home'} ? ' ativo' : ''">
+                    Início
+                </a>
+
+                <a th:href="@{/profissionais/pagina}"
+                    th:classappend="${paginaAtual == 'profissionais'} ? ' ativo' : ''">
+                    Profissionais
+                </a>
+
+                <a th:href="@{/consultas}" th:classappend="${paginaAtual == 'consultas'} ? ' ativo' : ''">
+                    Consultas
+                </a>
+
+                <a th:href="@{/internacoes}" th:classappend="${paginaAtual == 'internacoes'} ? ' ativo' : ''">
+                    Internações
+                </a>
+
+                <a th:href="@{/perfil/doutor}" th:classappend="${paginaAtual == 'perfil'} ? ' ativo' : ''">
+                    Meu perfil
+                </a>
+
+            </nav>
+
+            <!-- LOGOUT -->
+            <form th:action="@{/logout}" method="post" class="navbar-logout">
+                <button type="submit">
+                    Sair
+                </button>
+            </form>
+
+        </div>
+
+    </header>
+
+</body>
+
+</html>

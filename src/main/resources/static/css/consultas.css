@@ -1,0 +1,152 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #F8FAFC;
+    color: #00334F;
+    min-height: 100vh;
+}
+
+main {
+    width: 92%;
+    max-width: 1200px;
+    margin: 40px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.caixa {
+    background-color: #FFFFFF;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 51, 79, 0.08);
+}
+
+.caixa h2 {
+    color: #005380;
+    font-size: 23px;
+    margin-bottom: 25px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+form label {
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+form input,
+form select,
+form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #CBD5E1;
+    border-radius: 7px;
+    font-size: 15px;
+    font-family: inherit;
+    background-color: #FFFFFF;
+    color: #1E293B;
+    outline: none;
+}
+
+form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+form input:focus,
+form select:focus,
+form textarea:focus {
+    border-color: #005380;
+    box-shadow: 0 0 0 3px rgba(0, 83, 128, 0.12);
+}
+
+.linha {
+    display: flex;
+    gap: 20px;
+}
+
+.linha > div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+form button {
+    margin-top: 15px;
+    padding: 13px;
+    border: none;
+    border-radius: 7px;
+    background-color: #005380;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+form button:hover {
+    background-color: #00334F;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+th,
+td {
+    padding: 15px;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+th {
+    background-color: #E8F3F9;
+    color: #00334F;
+    font-weight: 600;
+}
+
+td {
+    color: #526477;
+}
+
+tbody tr:hover,
+table tr:hover {
+    background-color: #F8FAFC;
+}
+
+footer {
+    padding: 20px;
+    text-align: center;
+    color: #526477;
+    font-size: 14px;
+}
+
+@media (max-width: 750px) {
+    .caixa {
+        padding: 20px;
+    }
+
+    .linha {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
