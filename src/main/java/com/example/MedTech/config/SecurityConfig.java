@@ -16,7 +16,9 @@ public class SecurityConfig {
 
         http
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/profissionais/**"))
+                .ignoringRequestMatchers(
+                    "/profissionais/**", "/pacientes/**", "/internacoes/**",
+                    "/quartos/**", "/procedimentos/**"))
 
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
@@ -25,6 +27,14 @@ public class SecurityConfig {
                 ).permitAll()
 
                 .requestMatchers("/profissionais/**").permitAll()
+
+                // A página HTML de internações continua exigindo login.
+                .requestMatchers("/internacoes/pagina").authenticated()
+
+                // TODO: liberado só para testar as APIs (como /profissionais).
+                // Trocar por autenticação/papéis antes de entregar: são dados clínicos.
+                .requestMatchers("/pacientes/**", "/internacoes/**",
+                    "/quartos/**", "/procedimentos/**").permitAll()
 
                 .requestMatchers("/perfil/paciente").hasRole("PACIENTE")
                 .requestMatchers("/perfil/doutor").hasRole("DOUTOR")

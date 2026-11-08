@@ -322,7 +322,7 @@ public class SecureLoginController {
         return "consultas";
     }
 
-    @GetMapping("/internacoes")
+    @GetMapping("/internacoes/pagina")
     public String internacoes(Model model) {
 
         model.addAttribute("paginaAtual", "internacoes");
