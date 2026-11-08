@@ -1,0 +1,202 @@
+---
+title: MedTech - classes implementadas na Sprint 2
+---
+classDiagram
+    direction TB
+    class AtendimentoEmergencia {
+        -PrioridadeAtendimento prioridade
+        +validarAtendimento() void
+    }
+    class Cirurgiao {
+        +realizarCirurgia() void
+        +registrarProcedimento(LocalDate, String, String) void
+        +registrarObservacoesPreOperatorias(String) void
+        +registrarObservacoesPosOperatorias(String) void
+    }
+    class Consulta {
+        -Long id
+        -Paciente paciente
+        -Profissional profissional
+        -LocalDate data
+        -LocalTime horario
+        -String motivo
+        -String observacoesMedicas
+        -StatusConsulta status
+        +remarcar(LocalDate, LocalTime) void
+        +iniciar() void
+        +confirmar() void
+        +registrarNaoComparecimento() void
+        +cancelar() void
+        +concluir(String) void
+        +validarAtendimento() void
+        +verificarAgendada() void
+    }
+    class ConsultaEspecializada {
+        -Especialidade especialidade
+        +validarAtendimento() void
+    }
+    class ConsultaRotina {
+        +validarAtendimento() void
+    }
+    class HistoricoMedico {
+        -Long id
+        -Paciente paciente
+        -String informacoesRelevantes
+        +adicionarInformacao(String) void
+    }
+    class Internacao {
+        -Long id
+        -Paciente paciente
+        -Profissional profissional
+        -Quarto quarto
+        -LocalDate dataEntrada
+        -LocalDate dataPrevistaAlta
+        -LocalDate dataEfetivaAlta
+        -String observacoes
+        +estaAtiva() boolean
+        +registrarAlta(LocalDate) void
+        +alterarPrevisaoAlta(LocalDate) void
+    }
+    class MedicoClinicoGeral {
+        +realizarConsultaRotina() void
+        +realizarAvaliacaoInicial() void
+        +encaminharParaEspecialista() void
+        +registrarConsulta(String) void
+    }
+    class MedicoEspecialista {
+        -Especialidade especialidade
+        +realizarAtendimentoEspecializado() void
+        +registrarObservacoes(String) void
+        +consultarEspecialidade() void
+    }
+    class Paciente {
+        -Long id
+        -String nome
+        -String cpf
+        -LocalDate dataNascimento
+        -String telefone
+        -String endereco
+        -String email
+        -HistoricoMedico historicoMedico
+        +atualizarContato(String, String) void
+    }
+    class ProcedimentoCirurgico {
+        -Long id
+        -Internacao internacao
+        -Cirurgiao cirurgiao
+        -String descricao
+        -LocalDateTime dataHora
+        -StatusProcedimento status
+        -String observacoesPreOperatorias
+        -String observacoesPosOperatorias
+        +estaAtivo() boolean
+        +registrarObservacoesPreOperatorias(String) void
+        +iniciar() void
+        +concluir(String) void
+        +cancelar() void
+    }
+    class Profissional {
+        <<abstract>>
+        -Long id
+        -String nome
+        -String cpf
+        -String email
+        -String telefone
+        -String crm
+    }
+    class Quarto {
+        -Long id
+        -int numero
+        -int andar
+        -int capacidadeMaxima
+        -int ocupacaoAtual
+        -StatusQuarto status
+        +verificarDisponibilidade() boolean
+        +adicionarPaciente() void
+        +removerPaciente() void
+        +atualizarStatus() void
+        +colocarEmManutencao() void
+        +sairDeManutencao() void
+        +vagasDisponiveis() int
+        +atualizarDados(int, int, int) void
+    }
+    class Usuario {
+        -Long id
+        -String email
+        -String senha
+        -TipoUsuario tipo
+    }
+    class Especialidade {
+        <<enumeration>>
+        CARDIOLOGIA
+        NEUROLOGIA
+        ORTOPEDIA
+        DERMATOLOGIA
+        PEDIATRIA
+        OFTALMOLOGIA
+        PSIQUIATRIA
+        ENDOCRINOLOGIA
+        GINECOLOGIA
+        UROLOGIA
+    }
+    class PrioridadeAtendimento {
+        <<enumeration>>
+        BAIXA
+        MODERADA
+        ALTA
+        CRITICA
+    }
+    class StatusConsulta {
+        <<enumeration>>
+        AGENDADA
+        CONFIRMADA
+        EM_ATENDIMENTO
+        CONCLUIDA
+        CANCELADA
+        NAO_COMPARECEU
+    }
+    class StatusProcedimento {
+        <<enumeration>>
+        AGENDADO
+        EM_ANDAMENTO
+        CONCLUIDO
+        CANCELADO
+    }
+    class StatusQuarto {
+        <<enumeration>>
+        DISPONIVEL
+        OCUPADO
+        MANUTENCAO
+    }
+    class TipoConsulta {
+        <<enumeration>>
+        ROTINA
+        ESPECIALIZADA
+        EMERGENCIA
+    }
+    class TipoUsuario {
+        <<enumeration>>
+        PACIENTE
+        DOUTOR
+    }
+    AtendimentoEmergencia ..> PrioridadeAtendimento
+    Consulta "0..*" --> "1" Paciente : paciente
+    Consulta "0..*" --> "1" Profissional : profissional
+    Consulta ..> StatusConsulta
+    Consulta <|-- AtendimentoEmergencia
+    Consulta <|-- ConsultaEspecializada
+    Consulta <|-- ConsultaRotina
+    ConsultaEspecializada ..> Especialidade
+    Internacao "0..*" --> "1" Paciente : paciente
+    Internacao "0..*" --> "1" Profissional : profissional
+    Internacao "0..*" --> "1" Quarto : quarto
+    MedicoEspecialista ..> Especialidade
+    Paciente "1" *-- "1" HistoricoMedico
+    ProcedimentoCirurgico "0..*" --> "1" Cirurgiao : cirurgiao
+    ProcedimentoCirurgico "0..*" --> "1" Internacao : internacao
+    ProcedimentoCirurgico ..> StatusProcedimento
+    Profissional <|-- Cirurgiao
+    Profissional <|-- MedicoClinicoGeral
+    Profissional <|-- MedicoEspecialista
+    Quarto ..> StatusQuarto
+    Usuario ..> TipoUsuario

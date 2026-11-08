@@ -303,7 +303,7 @@ public class SecureLoginController {
 
     // ---------- CONSULTAS E INTERNAÇÕES ----------
 
-    @GetMapping("/consultas")
+    @GetMapping("/consultas/pagina")
     public String consultas(
             Authentication authentication,
             Model model) {
