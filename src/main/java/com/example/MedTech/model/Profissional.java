@@ -1,8 +1,9 @@
+
 package com.example.MedTech.model;
 
 import jakarta.persistence.*;
 
-@Entity 
+@Entity
 @Table(name = "profissionais")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo_profissional")
@@ -11,6 +12,7 @@ public abstract class Profissional {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String nome;
     private String cpf;
     private String email;
@@ -20,8 +22,8 @@ public abstract class Profissional {
     public Profissional() {
     }
 
-    public Profissional( String nome, String cpf,
-                        String email, String telefone, String crm) {
+    public Profissional(String nome, String cpf, String email,
+                        String telefone, String crm) {
         this.nome = nome;
         this.cpf = cpf;
         this.email = email;

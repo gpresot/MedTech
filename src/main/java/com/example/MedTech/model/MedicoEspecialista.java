@@ -1,12 +1,14 @@
+
 package com.example.MedTech.model;
 
 import com.example.MedTech.enums.Especialidade;
+
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 
-@Entity 
+@Entity
 @DiscriminatorValue("ESPECIALISTA")
 public class MedicoEspecialista extends Profissional {
 
@@ -17,11 +19,11 @@ public class MedicoEspecialista extends Profissional {
         super();
     }
 
-    public MedicoEspecialista( String nome, String cpf,
+    public MedicoEspecialista(String nome, String cpf,
                               String email, String telefone, String crm,
                               Especialidade especialidade) {
 
-        super( nome, cpf, email, telefone, crm);
+        super(nome, cpf, email, telefone, crm);
         this.especialidade = especialidade;
     }
 
@@ -31,17 +33,5 @@ public class MedicoEspecialista extends Profissional {
 
     public void setEspecialidade(Especialidade especialidade) {
         this.especialidade = especialidade;
-    }
-
-    public void realizarAtendimentoEspecializado() {
-        System.out.println("Atendimento especializado realizado.");
-    }
-
-    public void registrarObservacoes(String observacoes) {
-        System.out.println("Observações: " + observacoes);
-    }
-
-    public void consultarEspecialidade() {
-        System.out.println("Especialidade: " + especialidade);
     }
 }
