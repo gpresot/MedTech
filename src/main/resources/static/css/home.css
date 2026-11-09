@@ -108,26 +108,26 @@ body {
     padding: 25px 20px;
     text-align: left;
     text-decoration: none;
-    background-color: #F8FAFC;
-    border: 1px solid #DCE8EF;
+    background-color: #00334F;
+    border: 1px solid #00334F;
     border-radius: 10px;
     transition: 0.2s;
 }
 
 .home-btn:hover {
-    background-color: #E8F3F9;
+    background-color: #005380;
     border-color: #005380;
     transform: translateY(-3px);
 }
 
 .home-btn-title {
-    color: #005380;
+    color: #FFFFFF;
     font-size: 17px;
     font-weight: 700;
 }
 
 .home-btn-description {
-    color: #526477;
+    color: #E8F3F9;
     font-size: 13px;
     line-height: 1.6;
 }
