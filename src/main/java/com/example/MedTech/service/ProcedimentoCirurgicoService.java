@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.MedTech.dto.ProcedimentoRequest;
 import com.example.MedTech.dto.ProcedimentoResponse;
 import com.example.MedTech.enums.StatusProcedimento;
+import com.example.MedTech.enums.TipoCirurgia;
 import com.example.MedTech.exception.RecursoNaoEncontradoException;
 import com.example.MedTech.exception.RegraNegocioException;
 import com.example.MedTech.model.Cirurgiao;
@@ -115,8 +116,9 @@ public class ProcedimentoCirurgicoService {
                     "O paciente já possui outra cirurgia nesse horário.");
         }
 
+        TipoCirurgia tipo = req.tipo() != null ? req.tipo() : TipoCirurgia.ELETIVA;
         ProcedimentoCirurgico procedimento = new ProcedimentoCirurgico(internacao, cirurgiao,
-                req.descricao().trim(), req.dataHora(), req.observacoesPreOperatorias());
+                req.descricao().trim(), tipo, req.dataHora(), req.observacoesPreOperatorias());
 
         return ProcedimentoResponse.de(procedimentoRepository.save(procedimento));
     }

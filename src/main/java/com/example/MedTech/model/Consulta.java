@@ -16,7 +16,7 @@ import jakarta.persistence.*;
 })
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo_consulta")
-public class Consulta {
+public class Consulta extends Atendimento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -103,9 +103,10 @@ public class Consulta {
         status = StatusConsulta.CONCLUIDA;
     }
 
+    @Override
     public void validarAtendimento() {
-        if (paciente == null || profissional == null || data == null || horario == null
-                || motivo == null || motivo.isBlank()) {
+        validarDadosComuns();
+        if (data == null || horario == null || motivo == null || motivo.isBlank()) {
             throw new RegraNegocioException("Preencha os dados obrigatórios da consulta.");
         }
     }
@@ -126,6 +127,7 @@ public class Consulta {
         return id;
     }
 
+    @Override
     public Paciente getPaciente() {
         return paciente;
     }
@@ -134,6 +136,7 @@ public class Consulta {
         this.paciente = paciente;
     }
 
+    @Override
     public Profissional getProfissional() {
         return profissional;
     }

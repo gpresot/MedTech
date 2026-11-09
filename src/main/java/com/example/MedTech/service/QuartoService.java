@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.MedTech.dto.QuartoRequest;
 import com.example.MedTech.dto.QuartoResponse;
 import com.example.MedTech.enums.StatusQuarto;
+import com.example.MedTech.enums.TipoQuarto;
 import com.example.MedTech.exception.RecursoNaoEncontradoException;
 import com.example.MedTech.exception.RegraNegocioException;
 import com.example.MedTech.model.Quarto;
@@ -46,7 +47,8 @@ public class QuartoService {
         if (quartoRepository.existsByNumero(req.numero())) {
             throw new RegraNegocioException("Já existe um quarto com o número " + req.numero() + ".");
         }
-        Quarto quarto = new Quarto(req.numero(), req.andar(), req.capacidadeMaxima());
+        TipoQuarto tipo = req.tipo() != null ? req.tipo() : TipoQuarto.ENFERMARIA;
+        Quarto quarto = new Quarto(req.numero(), req.andar(), tipo, req.capacidadeMaxima());
         return QuartoResponse.de(quartoRepository.save(quarto));
     }
 
@@ -57,7 +59,8 @@ public class QuartoService {
             throw new RegraNegocioException("Já existe outro quarto com o número " + req.numero() + ".");
         }
 
-        quarto.atualizarDados(req.numero(), req.andar(), req.capacidadeMaxima());
+        TipoQuarto tipo = req.tipo() != null ? req.tipo() : quarto.getTipo();
+        quarto.atualizarDados(req.numero(), req.andar(), tipo, req.capacidadeMaxima());
         return QuartoResponse.de(quarto);
     }
 

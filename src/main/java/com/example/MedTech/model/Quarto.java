@@ -1,6 +1,7 @@
 package com.example.MedTech.model;
 
 import com.example.MedTech.enums.StatusQuarto;
+import com.example.MedTech.enums.TipoQuarto;
 import com.example.MedTech.exception.RegraNegocioException;
 
 import jakarta.persistence.Column;
@@ -26,6 +27,10 @@ public class Quarto {
     @Column(nullable = false)
     private int andar;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(20) default 'ENFERMARIA'")
+    private TipoQuarto tipo = TipoQuarto.ENFERMARIA;
+
     @Column(nullable = false)
     private int capacidadeMaxima;
 
@@ -39,15 +44,35 @@ public class Quarto {
     public Quarto() {
     }
 
+    /** Construtor legado: quartos antigos passam a ser enfermarias. */
     public Quarto(int numero, int andar, int capacidadeMaxima) {
+        this(numero, andar, TipoQuarto.ENFERMARIA, capacidadeMaxima);
+    }
+
+    public Quarto(int numero, int andar, TipoQuarto tipo, int capacidadeMaxima) {
         this.numero = numero;
         this.andar = andar;
+        this.tipo = tipo != null ? tipo : TipoQuarto.ENFERMARIA;
+        validarCapacidade(capacidadeMaxima, this.tipo, 0);
         this.capacidadeMaxima = capacidadeMaxima;
     }
 
+    private void validarCapacidade(int capacidade, TipoQuarto categoria, int ocupacao) {
+        if (categoria == null) {
+            throw new RegraNegocioException("Informe o tipo do quarto.");
+        }
+        if (capacidade < 1 || capacidade > categoria.getCapacidadeMaxima()) {
+            throw new RegraNegocioException("A capacidade do tipo " + categoria
+                    + " deve ser entre 1 e " + categoria.getCapacidadeMaxima() + " leito(s).");
+        }
+        if (capacidade < ocupacao) {
+            throw new RegraNegocioException(
+                    "A capacidade não pode ser menor que a ocupação atual (" + ocupacao + ").");
+        }
+    }
+
     public boolean verificarDisponibilidade() {
-        return status != StatusQuarto.MANUTENCAO
-                && ocupacaoAtual < capacidadeMaxima;
+        return status != StatusQuarto.MANUTENCAO && ocupacaoAtual < capacidadeMaxima;
     }
 
     public void adicionarPaciente() {
@@ -68,14 +93,10 @@ public class Quarto {
         atualizarStatus();
     }
 
-    /** Recalcula DISPONIVEL/OCUPADO conforme a lotação. Manutenção é preservada. */
     public void atualizarStatus() {
-        if (status == StatusQuarto.MANUTENCAO) {
-            return;
-        }
+        if (status == StatusQuarto.MANUTENCAO) return;
         status = ocupacaoAtual >= capacidadeMaxima
-                ? StatusQuarto.OCUPADO
-                : StatusQuarto.DISPONIVEL;
+                ? StatusQuarto.OCUPADO : StatusQuarto.DISPONIVEL;
     }
 
     public void colocarEmManutencao() {
@@ -92,18 +113,20 @@ public class Quarto {
     }
 
     public int vagasDisponiveis() {
-        return status == StatusQuarto.MANUTENCAO
-                ? 0
-                : capacidadeMaxima - ocupacaoAtual;
+        return status == StatusQuarto.MANUTENCAO ? 0 : capacidadeMaxima - ocupacaoAtual;
     }
 
+    /** Construtor de atualização legado: preserva o tipo atual do quarto. */
     public void atualizarDados(int numero, int andar, int capacidadeMaxima) {
-        if (capacidadeMaxima < ocupacaoAtual) {
-            throw new RegraNegocioException(
-                    "A capacidade não pode ser menor que a ocupação atual (" + ocupacaoAtual + ").");
-        }
+        atualizarDados(numero, andar, this.tipo, capacidadeMaxima);
+    }
+
+    public void atualizarDados(int numero, int andar, TipoQuarto tipo, int capacidadeMaxima) {
+        TipoQuarto novoTipo = tipo != null ? tipo : this.tipo;
+        validarCapacidade(capacidadeMaxima, novoTipo, ocupacaoAtual);
         this.numero = numero;
         this.andar = andar;
+        this.tipo = novoTipo;
         this.capacidadeMaxima = capacidadeMaxima;
         atualizarStatus();
     }
@@ -111,6 +134,7 @@ public class Quarto {
     public Long getId() { return id; }
     public int getNumero() { return numero; }
     public int getAndar() { return andar; }
+    public TipoQuarto getTipo() { return tipo; }
     public int getCapacidadeMaxima() { return capacidadeMaxima; }
     public int getOcupacaoAtual() { return ocupacaoAtual; }
     public StatusQuarto getStatus() { return status; }
