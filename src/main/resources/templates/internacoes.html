@@ -1,80 +1,256 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Internações - MedTech</title>
+
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
-    <link rel="stylesheet" th:href="@{/css/internacoes.css}">
+    <link rel="stylesheet" th:href="@{/css/gestao.css}">
     <link rel="icon" type="image/png" th:href="@{/images/icon.png}">
 </head>
 
 <body>
 
-<div th:replace="~{fragments/navbar :: navbar}"></div>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <main>
+    <main class="container">
 
+        <header class="cabecalho">
+            <h1>Internações</h1>
+            <p>Registro de entrada, previsão de alta e alta dos pacientes</p>
+        </header>
+
+        <!-- REGISTRAR ENTRADA -->
         <section class="caixa">
-            <h2>Internações</h2>
+            <h2>Registrar internação</h2>
 
-            <table>
-                <tr>
-                    <th>Paciente</th>
-                    <th>Profissional</th>
-                    <th>Quarto</th>
-                    <th>Entrada</th>
-                    <th>Previsão de Alta</th>
-                    <th>Situação</th>
-                </tr>
+            <form id="formInternacao" class="form-grid">
 
-                <tr>
-                    <td>Pedro Santos</td>
-                    <td>Dr. Rafael Lima</td>
-                    <td>201</td>
-                    <td>02/10/2026</td>
-                    <td>07/10/2026</td>
-                    <td>Internado</td>
-                </tr>
+                <div class="campo">
+                    <label for="pacienteId">Paciente</label>
+                    <select id="pacienteId" required></select>
+                </div>
 
-                <tr>
-                    <td>Juliana Costa</td>
-                    <td>Dra. Ana Souza</td>
-                    <td>105</td>
-                    <td>03/10/2026</td>
-                    <td>06/10/2026</td>
-                    <td>Internada</td>
-                </tr>
+                <div class="campo">
+                    <label for="profissionalId">Profissional responsável</label>
+                    <select id="profissionalId" required></select>
+                </div>
 
-                <tr>
-                    <td>Lucas Almeida</td>
-                    <td>Dr. Carlos Silva</td>
-                    <td>302</td>
-                    <td>01/10/2026</td>
-                    <td>05/10/2026</td>
-                    <td>Alta prevista</td>
-                </tr>
-            </table>
+                <div class="campo">
+                    <label for="quartoId">Quarto</label>
+                    <select id="quartoId" required></select>
+                </div>
+
+                <div class="campo">
+                    <label for="dataEntrada">Data de entrada</label>
+                    <input type="date" id="dataEntrada">
+                </div>
+
+                <div class="campo">
+                    <label for="dataPrevistaAlta">Previsão de alta</label>
+                    <input type="date" id="dataPrevistaAlta" required>
+                </div>
+
+                <div class="campo campo-largo">
+                    <label for="observacoes">Observações</label>
+                    <textarea id="observacoes" placeholder="Motivo da internação, cuidados..."></textarea>
+                </div>
+
+                <div class="campo campo-acoes">
+                    <button type="submit" class="botao">Registrar internação</button>
+                </div>
+            </form>
+
+            <p id="mensagemForm" class="mensagem"></p>
         </section>
 
-        <section class="caixa">
-            <h2>Detalhes da Internação</h2>
+        <!-- AÇÃO (previsão de alta / alta) -->
+        <section class="caixa oculto" id="painelAcao"></section>
 
-            <p><strong>Paciente:</strong> Pedro Santos</p>
-            <p><strong>Profissional responsável:</strong> Dr. Rafael Lima</p>
-            <p><strong>Quarto:</strong> 201</p>
-            <p><strong>Data de entrada:</strong> 02/10/2026</p>
-            <p><strong>Data prevista de alta:</strong> 07/10/2026</p>
-            <p><strong>Data efetiva de alta:</strong> -</p>
-            <p><strong>Observações:</strong> Paciente em acompanhamento médico.</p>
+        <!-- LISTA -->
+        <section class="caixa">
+
+            <div class="topo-caixa">
+                <h2>Internações</h2>
+
+                <label class="filtro">
+                    <input type="checkbox" id="soAtivas" checked>
+                    Mostrar só internações ativas
+                </label>
+            </div>
+
+            <p id="mensagemLista" class="mensagem"></p>
+            <div id="listaInternacoes"></div>
         </section>
 
     </main>
 
-    <footer>
-        <p>MedTech - Sistema Hospitalar</p>
-    </footer>
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+        const form = document.getElementById("formInternacao");
+        const msgForm = document.getElementById("mensagemForm");
+        const msgLista = document.getElementById("mensagemLista");
+        const soAtivas = document.getElementById("soAtivas");
+
+        // ---------- LISTAS DE SELEÇÃO ----------
+
+        function preencherSelect(id, itens, textoPadrao, textoVazio) {
+            const select = document.getElementById(id);
+
+            if (!itens.length) {
+                select.replaceChildren(el("option", { value: "" }, textoVazio));
+                return;
+            }
+
+            select.replaceChildren(
+                el("option", { value: "" }, textoPadrao),
+                ...itens.map(i => el("option", { value: i.valor }, i.texto))
+            );
+        }
+
+        async function carregarOpcoes() {
+            try {
+                const [pacientes, profissionais, quartos, ativas] = await Promise.all([
+                    api("/pacientes"),
+                    api("/profissionais"),
+                    api("/quartos/disponiveis"),
+                    api("/internacoes/ativas")
+                ]);
+
+                // Paciente já internado não aparece para nova internação.
+                const internados = new Set(ativas.map(i => i.pacienteId));
+
+                preencherSelect("pacienteId",
+                    pacientes.filter(p => !internados.has(p.id))
+                        .map(p => ({ valor: p.id, texto: `${p.nome} — CPF ${formatarCpf(p.cpf)}` })),
+                    "Selecione o paciente", "Nenhum paciente disponível");
+
+                preencherSelect("profissionalId",
+                    profissionais.map(p => ({ valor: p.id, texto: `${p.nome} (CRM ${p.crm})` })),
+                    "Selecione o profissional", "Nenhum profissional cadastrado");
+
+                preencherSelect("quartoId",
+                    quartos.map(q => ({
+                        valor: q.id,
+                        texto: `Quarto ${q.numero} — ${q.andar}º andar (${q.vagasDisponiveis} vaga${q.vagasDisponiveis > 1 ? "s" : ""})`
+                    })),
+                    "Selecione o quarto", "Nenhum quarto com vaga");
+
+            } catch (erro) {
+                mostrarMensagem(msgForm, erro.message, "erro");
+            }
+        }
+
+        // ---------- LISTA ----------
+
+        async function carregar() {
+            try {
+                const internacoes = await api(soAtivas.checked ? "/internacoes/ativas" : "/internacoes");
+                internacoes.sort((a, b) => b.dataEntrada.localeCompare(a.dataEntrada));
+                desenhar(internacoes);
+            } catch (erro) {
+                mostrarMensagem(msgLista, erro.message, "erro");
+            }
+        }
+
+        function desenhar(internacoes) {
+            desenharLista(
+                document.getElementById("listaInternacoes"),
+                soAtivas.checked ? "Nenhum paciente internado no momento." : "Nenhuma internação registrada.",
+                ["Paciente", "Responsável", "Quarto", "Entrada", "Previsão de alta", "Alta", "Situação", "Ações"],
+                internacoes.map(i => [
+                    el("span", { title: i.observacoes || "" }, i.pacienteNome),
+                    i.profissionalNome,
+                    i.quartoNumero,
+                    formatarData(i.dataEntrada),
+                    formatarData(i.dataPrevistaAlta),
+                    formatarData(i.dataEfetivaAlta),
+                    i.ativa ? selo("Internado", "alerta") : selo("Alta concedida", "ok"),
+                    i.ativa ? [
+                        el("button", { type: "button", class: "botao botao-secundario", onclick: () => pedirPrevisao(i) }, "Previsão de alta"),
+                        el("button", { type: "button", class: "botao", onclick: () => pedirAlta(i) }, "Dar alta")
+                    ] : "—"
+                ])
+            );
+        }
+
+        // ---------- REGISTRAR ----------
+
+        form.addEventListener("submit", async (evento) => {
+            evento.preventDefault();
+
+            const dados = {
+                pacienteId: Number(document.getElementById("pacienteId").value),
+                profissionalId: Number(document.getElementById("profissionalId").value),
+                quartoId: Number(document.getElementById("quartoId").value),
+                dataEntrada: document.getElementById("dataEntrada").value || null,
+                dataPrevistaAlta: document.getElementById("dataPrevistaAlta").value,
+                observacoes: document.getElementById("observacoes").value.trim() || null
+            };
+
+            mostrarMensagem(msgForm, "Registrando internação...", "");
+
+            try {
+                await api("/internacoes", { method: "POST", body: dados });
+
+                form.reset();
+                mostrarMensagem(msgForm, "Internação registrada com sucesso!", "sucesso");
+
+                await Promise.all([carregar(), carregarOpcoes()]);
+
+            } catch (erro) {
+                mostrarMensagem(msgForm, erro.message, "erro");
+            }
+        });
+
+        // ---------- PREVISÃO DE ALTA E ALTA ----------
+
+        function pedirPrevisao(i) {
+            abrirPainel({
+                titulo: `Alterar previsão de alta — ${i.pacienteNome}`,
+                rotulo: "Nova data prevista de alta",
+                tipo: "date",
+                valor: i.dataPrevistaAlta,
+                confirmar: "Salvar previsão",
+                onConfirmar: async (data) => {
+                    await api(`/internacoes/${i.id}/previsao-alta`, {
+                        method: "PUT",
+                        body: { dataPrevistaAlta: data }
+                    });
+
+                    mostrarMensagem(msgLista, "Previsão de alta atualizada.", "sucesso");
+                    await carregar();
+                }
+            });
+        }
+
+        function pedirAlta(i) {
+            abrirPainel({
+                titulo: `Registrar alta — ${i.pacienteNome}`,
+                rotulo: "Data da alta",
+                tipo: "date",
+                valor: hoje(),
+                confirmar: "Confirmar alta",
+                onConfirmar: async (data) => {
+                    await api(`/internacoes/${i.id}/alta`, {
+                        method: "POST",
+                        body: { dataAlta: data }
+                    });
+
+                    mostrarMensagem(msgLista, `Alta registrada para ${i.pacienteNome}. O leito foi liberado.`, "sucesso");
+                    await Promise.all([carregar(), carregarOpcoes()]);
+                }
+            });
+        }
+
+        soAtivas.addEventListener("change", carregar);
+
+        carregarOpcoes();
+        carregar();
+    </script>
 
 </body>
 

@@ -20,4 +20,8 @@ public interface ProfissionalRepository extends JpaRepository<Profissional, Long
             @Param("especialidade") Especialidade especialidade);
 
     Optional<Profissional> findByEmail(String email);
+
+    boolean existsByCrm(String crm);
+
+    boolean existsByCrmAndIdNot(String crm, Long id);
 }

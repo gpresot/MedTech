@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -36,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "logging.level.org.springframework.security=WARN"
 })
 @Transactional
+@WithMockUser(roles = "DOUTOR")
 class InternacaoQuartoCirurgiaApiTests {
 
     @Autowired private WebApplicationContext contexto;
@@ -175,6 +177,29 @@ class InternacaoQuartoCirurgiaApiTests {
                 + LocalDateTime.now().plusDays(30) + "\"}";
 
         mvc.perform(post("/procedimentos").contentType(MediaType.APPLICATION_JSON).content(corpo))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void cirurgiaoConsultaSeusProcedimentosComDataPacienteEDescricao() throws Exception {
+        long internacaoId = registrarInternacao(paciente.getId(), quarto.getId());
+        String corpo = "{\"internacaoId\":" + internacaoId
+                + ",\"cirurgiaoId\":" + cirurgiao.getId()
+                + ",\"descricao\":\"Apendicectomia\",\"dataHora\":\""
+                + LocalDateTime.now().plusDays(20) + "\"}";
+        mvc.perform(post("/procedimentos").contentType(MediaType.APPLICATION_JSON).content(corpo))
+                .andExpect(status().isCreated());
+
+        mvc.perform(get("/profissionais/{id}/procedimentos", cirurgiao.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].descricao").value("Apendicectomia"))
+                .andExpect(jsonPath("$[0].pacienteNome").value("Paciente um"))
+                .andExpect(jsonPath("$[0].dataHora").exists());
+        mvc.perform(get("/profissionais/{id}/procedimentos", cirurgiao.getId())
+                .param("status", "CONCLUIDO"))
+                .andExpect(jsonPath("$.length()").value(0));
+        mvc.perform(delete("/profissionais/{id}", cirurgiao.getId()))
                 .andExpect(status().isConflict());
     }
 

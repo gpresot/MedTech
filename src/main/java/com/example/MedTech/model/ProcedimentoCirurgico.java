@@ -2,7 +2,7 @@ package com.example.MedTech.model;
 
 import java.time.LocalDateTime;
 
-import com.example.MedTech.enums.StatusAtendimento;
+import com.example.MedTech.enums.StatusProcedimento;
 import com.example.MedTech.enums.TipoCirurgia;
 import com.example.MedTech.exception.RegraNegocioException;
 
@@ -11,9 +11,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -21,10 +18,6 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "procedimentos_cirurgicos")
 public class ProcedimentoCirurgico extends Atendimento {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "internacao_id", nullable = false)
@@ -49,7 +42,7 @@ public class ProcedimentoCirurgico extends Atendimento {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private StatusAtendimento status = StatusAtendimento.AGENDADO;
+    private StatusProcedimento status = StatusProcedimento.AGENDADO;
 
     @Column(columnDefinition = "TEXT")
     private String observacoesPreOperatorias;
@@ -92,11 +85,11 @@ public class ProcedimentoCirurgico extends Atendimento {
     }
 
     public boolean estaAtivo() {
-        return status == StatusAtendimento.AGENDADO || status == StatusAtendimento.EM_ANDAMENTO;
+        return status == StatusProcedimento.AGENDADO || status == StatusProcedimento.EM_ANDAMENTO;
     }
 
     public void registrarObservacoesPreOperatorias(String observacoes) {
-        if (status != StatusAtendimento.AGENDADO) {
+        if (status != StatusProcedimento.AGENDADO) {
             throw new RegraNegocioException(
                     "Observações pré-operatórias só podem ser alteradas antes do início da cirurgia.");
         }
@@ -104,7 +97,7 @@ public class ProcedimentoCirurgico extends Atendimento {
     }
 
     public void iniciar() {
-        if (status != StatusAtendimento.AGENDADO) {
+        if (status != StatusProcedimento.AGENDADO) {
             throw new RegraNegocioException("Apenas cirurgias agendadas podem ser iniciadas.");
         }
         if (observacoesPreOperatorias == null || observacoesPreOperatorias.isBlank()) {
@@ -112,28 +105,27 @@ public class ProcedimentoCirurgico extends Atendimento {
                     "Registre as observações pré-operatórias antes de iniciar a cirurgia.");
         }
         this.dataHoraInicioEfetivo = LocalDateTime.now();
-        this.status = StatusAtendimento.EM_ANDAMENTO;
+        this.status = StatusProcedimento.EM_ANDAMENTO;
     }
 
     public void concluir(String observacoesPos) {
-        if (status != StatusAtendimento.EM_ANDAMENTO) {
+        if (status != StatusProcedimento.EM_ANDAMENTO) {
             throw new RegraNegocioException(
                     "Apenas cirurgias em andamento podem ser concluídas.");
         }
         this.observacoesPosOperatorias = observacoesPos;
         this.dataHoraFimEfetivo = LocalDateTime.now();
-        this.status = StatusAtendimento.CONCLUIDO;
+        this.status = StatusProcedimento.CONCLUIDO;
     }
 
     public void cancelar() {
-        if (status == StatusAtendimento.CONCLUIDO || status == StatusAtendimento.CANCELADO) {
+        if (status == StatusProcedimento.CONCLUIDO || status == StatusProcedimento.CANCELADO) {
             throw new RegraNegocioException(
                     "Cirurgias concluídas ou já canceladas não podem ser canceladas.");
         }
-        this.status = StatusAtendimento.CANCELADO;
+        this.status = StatusProcedimento.CANCELADO;
     }
 
-    public Long getId() { return id; }
     @Override
     public Paciente getPaciente() { return internacao != null ? internacao.getPaciente() : null; }
     @Override
@@ -143,9 +135,13 @@ public class ProcedimentoCirurgico extends Atendimento {
     public String getDescricao() { return descricao; }
     public TipoCirurgia getTipo() { return tipo; }
     public LocalDateTime getDataHora() { return dataHora; }
+    @Override
+    public LocalDateTime getDataHoraPrevista() { return dataHora; }
+    @Override
+    public String getSituacao() { return status.name(); }
     public LocalDateTime getDataHoraInicioEfetivo() { return dataHoraInicioEfetivo; }
     public LocalDateTime getDataHoraFimEfetivo() { return dataHoraFimEfetivo; }
-    public StatusAtendimento getStatus() { return status; }
+    public StatusProcedimento getStatus() { return status; }
     public String getObservacoesPreOperatorias() { return observacoesPreOperatorias; }
     public String getObservacoesPosOperatorias() { return observacoesPosOperatorias; }
 }

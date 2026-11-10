@@ -11,7 +11,7 @@ Sistema hospitalar desenvolvido como trabalho prático da disciplina **Programa�
 
 ## Sobre o projeto
 
-O MedTech gerencia o fluxo de um hospital: cadastro de pacientes e profissionais, histórico médico, controle de quartos, internações e procedimentos cirúrgicos. A modelagem (diagrama de classes e cartões CRC) está na pasta [`docs/`](docs).
+O MedTech gerencia o fluxo de um hospital: cadastro de pacientes e profissionais, histórico médico, controle de quartos, internações e procedimentos cirúrgicos. A modelagem está na pasta [`docs/`](docs): diagrama de classes atualizado (`Diagrama_de_Classes_Sprint_2.pdf`, com o fonte Mermaid em `diagrama-classes-sprint2.mmd`), o resumo da Sprint 2 em [`docs/SPRINT2.md`](docs/SPRINT2.md) e, em `docs/sprint1/`, o material da Sprint 1.
 
 ## Tecnologias
 
@@ -47,7 +47,8 @@ src/main/java/com/example/MedTech
 ├── config        # Segurança e usuários
 ├── controller    # APIs REST e controllers das páginas
 ├── dto           # Objetos de requisição e resposta
-├── enums         # Especialidade, TipoQuarto, TipoCirurgia, StatusQuarto, StatusAtendimento
+├── enums         # Especialidade, TipoConsulta, StatusConsulta, StatusProcedimento, PrioridadeAtendimento,
+│                 # TipoCirurgia, TipoQuarto, StatusQuarto
 ├── exception     # Exceções e tratamento global (404, 409, 400)
 ├── factory       # ProfissionalFactory
 ├── model         # Entidades JPA
@@ -59,7 +60,7 @@ src/main/java/com/example/MedTech
 
 `Paciente` (1) ── (1) `HistoricoMedico` · `Paciente` (1) ── (N) `Internacao` · `Quarto` (1) ── (N) `Internacao` · `Profissional` (1) ── (N) `Internacao` · `Internacao` (1) ── (N) `ProcedimentoCirurgico` · `Cirurgiao` (1) ── (N) `ProcedimentoCirurgico`
 
-`Atendimento` é a classe abstrata comum às consultas e aos procedimentos cirúrgicos; cada modalidade implementa sua validação específica.
+`Atendimento` é a classe abstrata comum às consultas e aos procedimentos cirúrgicos (id, paciente, profissional, data/hora prevista); cada modalidade implementa sua validação específica. `Consulta` é abstrata, com `ConsultaRotina`, `ConsultaEspecializada` e `AtendimentoEmergencia`. Consultas usam `StatusConsulta` (AGENDADA, CONFIRMADA, EM_ATENDIMENTO, CONCLUIDA, CANCELADA, NAO_COMPARECEU) e cirurgias usam `StatusProcedimento` (AGENDADO, EM_ANDAMENTO, CONCLUIDO, CANCELADO).
 
 `Profissional` é abstrata e tem três especializações (`MedicoClinicoGeral`, `MedicoEspecialista`, `Cirurgiao`) em tabela única.
 
@@ -68,7 +69,10 @@ src/main/java/com/example/MedTech
 Erros: `400` validação, `404` recurso não encontrado, `409` violação de regra de negócio.
 
 ### `/profissionais`
-`GET /` · `GET /{id}` · `POST /` · `PUT /{id}` · `DELETE /{id}` · `GET /especialidade/{especialidade}`
+`GET /` · `GET /{id}` · `POST /` · `PUT /{id}` · `DELETE /{id}` (bloqueado se houver consultas, internações ou cirurgias) · `GET /especialidade/{especialidade}` · `GET /{id}/procedimentos[?status=]` (procedimentos do cirurgião: data, paciente e descrição). As respostas incluem `tipo` (`CLINICO`, `ESPECIALISTA`, `CIRURGIAO`).
+
+### `/consultas`
+`GET /[?status=&tipo=]` · `GET /{id}` · `GET /paciente/{id}` · `POST /` · `PUT /{id}` · `DELETE /{id}` (cancela) · `POST /{id}/confirmar` · `/iniciar` · `/nao-compareceu` · `/concluir` · `/encaminhar`
 
 ### `/pacientes`
 | Método | Rota | Descrição |
@@ -120,6 +124,16 @@ A página HTML de internações fica em `/internacoes/pagina`.
 
 ## Regras de negócio
 
+**Profissionais**
+- `MedicoClinicoGeral`, `MedicoEspecialista` (com `especialidade` obrigatória) e `Cirurgiao`. A categoria não pode ser trocada na edição e o CRM é único.
+- Só é possível excluir um profissional sem consultas, internações ou cirurgias registradas.
+
+**Consultas**
+- Modalidades: `ROTINA` (exige clínico geral), `ESPECIALIZADA` (a especialidade deve ser a do médico) e `EMERGENCIA` (exige prioridade `BAIXA`, `MODERADA`, `ALTA` ou `CRITICA`).
+- Situações: `AGENDADA` → `CONFIRMADA` → `EM_ATENDIMENTO` → `CONCLUIDA`; também `CANCELADA` e `NAO_COMPARECEU`. Consulta concluída, cancelada ou com falta não volta a ser agendada nem é concluída; é preciso criar um novo agendamento.
+- O profissional não pode ter duas consultas no mesmo dia e horário.
+- O clínico geral pode registrar encaminhamento para uma especialidade durante ou após a consulta de rotina.
+
 **Quartos**
 - Tipos: `ENFERMARIA` (até 6 leitos), `APARTAMENTO` (até 2) e `UTI` (até 1).
 - Quando o tipo não é informado, o quarto é cadastrado como `ENFERMARIA`.
@@ -143,6 +157,4 @@ A página HTML de internações fica em `/internacoes/pagina`.
 
 ## Pendências
 
-- Integrar o cadastro de paciente (`/register/paciente`) à entidade `Paciente`.
-- Incluir `Consulta` no histórico médico.
-- Restringir o acesso às APIs por autenticação e papéis (hoje estão liberadas para testes).
+- `/profissionais/**` e `/consultas/**` ainda estão liberados sem login (ver `SecurityConfig`); restringir antes de uso real.

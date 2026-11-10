@@ -3,11 +3,13 @@ package com.example.MedTech.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.MedTech.dto.ConsultaResponse;
 import com.example.MedTech.dto.HistoricoMedicoResponse;
 import com.example.MedTech.dto.InternacaoResponse;
 import com.example.MedTech.dto.ProcedimentoResponse;
 import com.example.MedTech.exception.RecursoNaoEncontradoException;
 import com.example.MedTech.model.HistoricoMedico;
+import com.example.MedTech.repository.ConsultaRepository;
 import com.example.MedTech.repository.HistoricoMedicoRepository;
 import com.example.MedTech.repository.InternacaoRepository;
 import com.example.MedTech.repository.ProcedimentoCirurgicoRepository;
@@ -15,20 +17,22 @@ import com.example.MedTech.repository.ProcedimentoCirurgicoRepository;
 /**
  * Monta o histórico médico reunindo as informações do paciente, suas
  * internações e seus procedimentos cirúrgicos.
- * (Consultas entram aqui quando a classe Consulta existir.)
  */
 @Service
 @Transactional(readOnly = true)
 public class HistoricoMedicoService {
 
     private final HistoricoMedicoRepository historicoRepository;
+    private final ConsultaRepository consultaRepository;
     private final InternacaoRepository internacaoRepository;
     private final ProcedimentoCirurgicoRepository procedimentoRepository;
 
     public HistoricoMedicoService(HistoricoMedicoRepository historicoRepository,
+            ConsultaRepository consultaRepository,
             InternacaoRepository internacaoRepository,
             ProcedimentoCirurgicoRepository procedimentoRepository) {
         this.historicoRepository = historicoRepository;
+        this.consultaRepository = consultaRepository;
         this.internacaoRepository = internacaoRepository;
         this.procedimentoRepository = procedimentoRepository;
     }
@@ -37,6 +41,10 @@ public class HistoricoMedicoService {
         HistoricoMedico historico = historicoRepository.findByPacienteId(pacienteId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException(
                         "Histórico médico não encontrado para o paciente " + pacienteId + "."));
+
+        var consultas = consultaRepository
+                .findByPacienteIdOrderByDataDescHorarioDesc(pacienteId).stream()
+                .map(ConsultaResponse::de).toList();
 
         var internacoes = internacaoRepository
                 .findByPacienteIdOrderByDataEntradaDesc(pacienteId).stream()
@@ -50,6 +58,7 @@ public class HistoricoMedicoService {
                 pacienteId,
                 historico.getPaciente().getNome(),
                 historico.getInformacoesRelevantes(),
+                consultas,
                 internacoes,
                 procedimentos);
     }

@@ -183,3 +183,27 @@
         font-size: 12px;
     }
 }
+/* ==========================================================================
+   BOTÃO ENTRAR (visitante)
+   ========================================================================== */
+
+.navbar-logout .navbar-entrar {
+    display: inline-block;
+    padding: 10px 20px;
+
+    color: #ffffff;
+    background-color: #005380;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+
+    transition: all 0.2s ease;
+}
+
+.navbar-logout .navbar-entrar:hover {
+    background-color: #00334f;
+    transform: translateY(-1px);
+}

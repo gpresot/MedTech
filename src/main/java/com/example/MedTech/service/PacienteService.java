@@ -1,5 +1,6 @@
 package com.example.MedTech.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -78,6 +79,68 @@ public class PacienteService {
         paciente.atualizarContato(req.telefone(), email);
 
         return PacienteResponse.de(paciente);
+    }
+
+    /** Usado pela página de perfil: o paciente só altera telefone e endereço. */
+    public PacienteResponse atualizarContatoPorEmail(String email, String telefone, String endereco) {
+        Paciente paciente = pacienteRepository.findByEmail(normalizar(email))
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Paciente não encontrado para este usuário."));
+
+        if (telefone == null || !telefone.matches("\\d{10,11}")) {
+            throw new RegraNegocioException("O telefone deve conter 10 ou 11 números (com DDD).");
+        }
+        if (endereco == null || endereco.isBlank()) {
+            throw new RegraNegocioException("O endereço é obrigatório.");
+        }
+
+        // O e-mail é o login da conta, por isso não é alterado aqui.
+        paciente.atualizarContato(telefone, paciente.getEmail());
+        paciente.setEndereco(endereco.trim());
+
+        return PacienteResponse.de(paciente);
+    }
+
+    @Transactional(readOnly = true)
+    public PacienteResponse buscarPorEmail(String email) {
+        return pacienteRepository.findByEmail(normalizar(email))
+                .map(PacienteResponse::de)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Paciente não encontrado para este usuário."));
+    }
+
+    /**
+     * Contas de paciente criadas antes da integração do cadastro têm login mas
+     * não têm registro de Paciente. Aqui o paciente completa os dados.
+     */
+    public PacienteResponse completarCadastro(String email, String nome, String cpf,
+            LocalDate dataNascimento, String telefone, String endereco) {
+
+        String emailNormalizado = normalizar(email);
+
+        if (pacienteRepository.existsByEmail(emailNormalizado)) {
+            throw new RegraNegocioException("Seu cadastro já está completo.");
+        }
+        if (nome == null || nome.isBlank() || endereco == null || endereco.isBlank()) {
+            throw new RegraNegocioException("Preencha todos os campos obrigatórios.");
+        }
+        if (cpf == null || !cpf.matches("\\d{11}")) {
+            throw new RegraNegocioException("O CPF deve possuir 11 números.");
+        }
+        if (telefone == null || !telefone.matches("\\d{10,11}")) {
+            throw new RegraNegocioException("O telefone deve conter 10 ou 11 números (com DDD).");
+        }
+        if (dataNascimento == null || !dataNascimento.isBefore(LocalDate.now())) {
+            throw new RegraNegocioException("A data de nascimento deve estar no passado.");
+        }
+        if (pacienteRepository.existsByCpf(cpf)) {
+            throw new RegraNegocioException("Já existe um paciente cadastrado com este CPF.");
+        }
+
+        Paciente paciente = new Paciente(nome.trim(), cpf, dataNascimento,
+                telefone, endereco.trim(), emailNormalizado);
+
+        return PacienteResponse.de(pacienteRepository.save(paciente));
     }
 
     public void excluir(Long id) {

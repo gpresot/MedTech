@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.MedTech.dto.ObservacoesRequest;
 import com.example.MedTech.dto.ProcedimentoRequest;
 import com.example.MedTech.dto.ProcedimentoResponse;
+import com.example.MedTech.dto.ProfissionalResumoResponse;
 import com.example.MedTech.service.ProcedimentoCirurgicoService;
 
 import jakarta.validation.Valid;
@@ -26,6 +27,11 @@ public class ProcedimentoCirurgicoController {
     @GetMapping
     public List<ProcedimentoResponse> listar() {
         return procedimentoService.listar();
+    }
+
+    @GetMapping("/cirurgioes")
+    public List<ProfissionalResumoResponse> listarCirurgioes() {
+        return procedimentoService.listarCirurgioes();
     }
 
     @GetMapping("/internacao/{internacaoId}")

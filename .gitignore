@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Banco H2 local
+data/
+*.mv.db

@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.MedTech.dto.InternacaoRequest;
 import com.example.MedTech.dto.InternacaoResponse;
-import com.example.MedTech.enums.StatusAtendimento;
+import com.example.MedTech.enums.StatusProcedimento;
 import com.example.MedTech.exception.RecursoNaoEncontradoException;
 import com.example.MedTech.exception.RegraNegocioException;
 import com.example.MedTech.model.Internacao;
@@ -108,7 +108,7 @@ public class InternacaoService {
         Internacao internacao = obter(id);
 
         if (internacao.estaAtiva() && procedimentoRepository.existsByInternacaoIdAndStatusIn(
-                id, List.of(StatusAtendimento.AGENDADO, StatusAtendimento.EM_ANDAMENTO))) {
+                id, List.of(StatusProcedimento.AGENDADO, StatusProcedimento.EM_ANDAMENTO))) {
             throw new RegraNegocioException(
                     "Não é possível dar alta com cirurgias agendadas ou em andamento. "
                             + "Conclua ou cancele os procedimentos antes.");

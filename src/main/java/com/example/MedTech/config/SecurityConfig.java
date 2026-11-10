@@ -23,21 +23,21 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/login", "/home", "/register", "/register/**",
-                    "/css/**", "/images/**", "/error"
+                    "/css/**", "/js/**", "/images/**", "/error"
                 ).permitAll()
 
                 .requestMatchers("/profissionais/**").permitAll()
 
-                // A página HTML de internações continua exigindo login.
-                .requestMatchers("/internacoes/pagina").authenticated()
                 .requestMatchers("/consultas/pagina").authenticated()
 
-                // TODO: liberado só para testar as APIs (como /profissionais).
-                // Trocar por autenticação/papéis antes de entregar: são dados clínicos.
-                .requestMatchers("/pacientes/**", "/internacoes/**",
-                    "/quartos/**", "/procedimentos/**", "/consultas/**").permitAll()
+                // Páginas e APIs de gestão: só profissionais (dados clínicos).
+                .requestMatchers("/pacientes/**", "/quartos/**",
+                    "/internacoes/**", "/procedimentos/**").hasRole("DOUTOR")
 
-                .requestMatchers("/perfil/paciente").hasRole("PACIENTE")
+                // TODO: liberado só para testar a API (como /profissionais).
+                .requestMatchers("/consultas/**").permitAll()
+
+                .requestMatchers("/perfil/paciente", "/perfil/paciente/**").hasRole("PACIENTE")
                 .requestMatchers("/perfil/doutor").hasRole("DOUTOR")
 
                 .anyRequest().authenticated()

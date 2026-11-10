@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import com.example.MedTech.dto.ConsultaRequest;
 import com.example.MedTech.dto.ConsultaResponse;
 import com.example.MedTech.dto.ObservacoesRequest;
-import com.example.MedTech.enums.StatusAtendimento;
+import com.example.MedTech.enums.StatusConsulta;
+import com.example.MedTech.enums.TipoConsulta;
+import com.example.MedTech.dto.EncaminhamentoRequest;
 import com.example.MedTech.service.ConsultaService;
 
 import jakarta.validation.Valid;
@@ -25,11 +27,9 @@ public class ConsultaController {
     }
 
     @GetMapping
-    public List<ConsultaResponse> listar(@RequestParam(required = false) StatusAtendimento status) {
-        if (status != null) {
-            return consultaService.listarPorStatus(status);
-        }
-        return consultaService.listar();
+    public List<ConsultaResponse> listar(@RequestParam(required = false) StatusConsulta status,
+            @RequestParam(required = false) TipoConsulta tipo) {
+        return consultaService.listarFiltrado(status, tipo);
     }
 
     @GetMapping("/{id}")
@@ -62,6 +62,12 @@ public class ConsultaController {
     @PostMapping("/{id}/iniciar")
     public ConsultaResponse iniciar(@PathVariable Long id) {
         return consultaService.iniciar(id);
+    }
+
+    @PostMapping("/{id}/encaminhar")
+    public ConsultaResponse encaminhar(@PathVariable Long id,
+            @Valid @RequestBody EncaminhamentoRequest req) {
+        return consultaService.encaminhar(id, req.especialidade());
     }
 
     @PostMapping("/{id}/confirmar")
