@@ -1,9 +1,10 @@
 package com.example.MedTech.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import com.example.MedTech.enums.StatusAtendimento;
+import com.example.MedTech.enums.StatusConsulta;
 import com.example.MedTech.enums.TipoConsulta;
 import com.example.MedTech.exception.RegraNegocioException;
 
@@ -16,11 +17,7 @@ import jakarta.persistence.*;
 })
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo_consulta")
-public class Consulta extends Atendimento {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public abstract class Consulta extends Atendimento {
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
@@ -44,7 +41,7 @@ public class Consulta extends Atendimento {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private StatusAtendimento status = StatusAtendimento.AGENDADO;
+    private StatusConsulta status = StatusConsulta.AGENDADA;
 
     public Consulta() {
     }
@@ -59,8 +56,16 @@ public class Consulta extends Atendimento {
         this.observacoesMedicas = observacoesMedicas;
     }
 
-    public TipoConsulta getTipo() {
-        return TipoConsulta.ROTINA;
+    public abstract TipoConsulta getTipo();
+
+    @Override
+    public LocalDateTime getDataHoraPrevista() {
+        return data != null && horario != null ? LocalDateTime.of(data, horario) : null;
+    }
+
+    @Override
+    public String getSituacao() {
+        return status.name();
     }
 
     public void remarcar(LocalDate data, LocalTime horario) {
@@ -72,35 +77,35 @@ public class Consulta extends Atendimento {
     public void iniciar() {
         verificarAguardando();
         validarAtendimento();
-        status = StatusAtendimento.EM_ANDAMENTO;
+        status = StatusConsulta.EM_ATENDIMENTO;
     }
 
     public void confirmar() {
         verificarAgendada();
-        status = StatusAtendimento.CONFIRMADO;
+        status = StatusConsulta.CONFIRMADA;
     }
 
     public void registrarNaoComparecimento() {
         verificarAguardando();
-        status = StatusAtendimento.NAO_COMPARECEU;
+        status = StatusConsulta.NAO_COMPARECEU;
     }
 
     public void cancelar() {
-        if (status == StatusAtendimento.CONCLUIDO || status == StatusAtendimento.CANCELADO
-                || status == StatusAtendimento.NAO_COMPARECEU) {
+        if (status == StatusConsulta.CONCLUIDA || status == StatusConsulta.CANCELADA
+                || status == StatusConsulta.NAO_COMPARECEU) {
             throw new RegraNegocioException(
                     "Não é possível cancelar uma consulta encerrada.");
         }
-        status = StatusAtendimento.CANCELADO;
+        status = StatusConsulta.CANCELADA;
     }
 
     public void concluir(String observacoes) {
-        if (status != StatusAtendimento.EM_ANDAMENTO) {
+        if (status != StatusConsulta.EM_ATENDIMENTO) {
             throw new RegraNegocioException(
                     "Apenas consultas em atendimento podem ser concluídas.");
         }
         observacoesMedicas = observacoes;
-        status = StatusAtendimento.CONCLUIDO;
+        status = StatusConsulta.CONCLUIDA;
     }
 
     @Override
@@ -112,19 +117,15 @@ public class Consulta extends Atendimento {
     }
 
     private void verificarAguardando() {
-        if (status != StatusAtendimento.AGENDADO && status != StatusAtendimento.CONFIRMADO) {
+        if (status != StatusConsulta.AGENDADA && status != StatusConsulta.CONFIRMADA) {
             throw new RegraNegocioException("A consulta precisa estar aguardando atendimento.");
         }
     }
 
     public void verificarAgendada() {
-        if (status != StatusAtendimento.AGENDADO) {
+        if (status != StatusConsulta.AGENDADA) {
             throw new RegraNegocioException("A consulta precisa estar agendada para esta operação.");
         }
-    }
-
-    public Long getId() {
-        return id;
     }
 
     @Override
@@ -169,7 +170,7 @@ public class Consulta extends Atendimento {
         this.observacoesMedicas = observacoesMedicas;
     }
 
-    public StatusAtendimento getStatus() {
+    public StatusConsulta getStatus() {
         return status;
     }
 }

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.MedTech.dto.ConsultaRequest;
 import com.example.MedTech.dto.ConsultaResponse;
 import com.example.MedTech.dto.ObservacoesRequest;
-import com.example.MedTech.enums.StatusAtendimento;
+import com.example.MedTech.enums.StatusConsulta;
 import com.example.MedTech.service.ConsultaService;
 
 import jakarta.validation.Valid;
@@ -25,7 +25,7 @@ public class ConsultaController {
     }
 
     @GetMapping
-    public List<ConsultaResponse> listar(@RequestParam(required = false) StatusAtendimento status) {
+    public List<ConsultaResponse> listar(@RequestParam(required = false) StatusConsulta status) {
         if (status != null) {
             return consultaService.listarPorStatus(status);
         }

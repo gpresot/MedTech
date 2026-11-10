@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.example.MedTech.enums.StatusAtendimento;
+import com.example.MedTech.enums.StatusConsulta;
 import com.example.MedTech.model.Consulta;
 import com.example.MedTech.model.Profissional;
 
@@ -22,7 +22,7 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
 
     List<Consulta> findByPacienteIdOrderByDataDescHorarioDesc(Long pacienteId);
 
-    List<Consulta> findByStatus(StatusAtendimento status);
+    List<Consulta> findByStatus(StatusConsulta status);
 
     @Query("SELECT COUNT(c) FROM Consulta c WHERE c.profissional.id = :profissionalId "
             + "AND c.data = :data AND c.horario = :horario AND c.status <> :cancelada "
@@ -30,7 +30,7 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
     long contarConflitos(@Param("profissionalId") Long profissionalId,
             @Param("data") LocalDate data,
             @Param("horario") LocalTime horario,
-            @Param("cancelada") StatusAtendimento cancelada,
+            @Param("cancelada") StatusConsulta cancelada,
             @Param("consultaId") Long consultaId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
