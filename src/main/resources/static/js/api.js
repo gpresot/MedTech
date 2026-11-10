@@ -150,6 +150,11 @@ const ROTULOS = {
     CONCLUIDO: "Concluído",
     CANCELADO: "Cancelado",
     NAO_COMPARECEU: "Não compareceu",
+    AGENDADA: "Agendada",
+    CONFIRMADA: "Confirmada",
+    EM_ATENDIMENTO: "Em atendimento",
+    CONCLUIDA: "Concluída",
+    CANCELADA: "Cancelada",
     // Tipo de cirurgia
     ELETIVA: "Eletiva",
     URGENCIA: "Urgência",

@@ -1,13 +1,16 @@
 package com.example.MedTech.service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.MedTech.dto.ConsultaRequest;
 import com.example.MedTech.dto.ConsultaResponse;
+import com.example.MedTech.enums.Especialidade;
 import com.example.MedTech.enums.StatusConsulta;
 import com.example.MedTech.enums.TipoConsulta;
 import com.example.MedTech.exception.RecursoNaoEncontradoException;
@@ -39,9 +42,27 @@ public class ConsultaService {
         return converter(consultaRepository.findAll());
     }
 
+    /** Filtra por situação e/ou modalidade (ex.: emergências ainda aguardando avaliação). */
     @Transactional(readOnly = true)
-    public List<ConsultaResponse> listarPorStatus(StatusConsulta status) {
-        return converter(consultaRepository.findByStatus(status));
+    public List<ConsultaResponse> listarFiltrado(StatusConsulta status, TipoConsulta tipo) {
+        List<Consulta> consultas = status != null
+                ? consultaRepository.findByStatus(status)
+                : consultaRepository.findAll();
+        List<Consulta> filtradas = new ArrayList<>();
+        for (Consulta consulta : consultas) {
+            if (tipo == null || consulta.getTipo() == tipo) {
+                filtradas.add(consulta);
+            }
+        }
+        if (tipo == TipoConsulta.EMERGENCIA) {
+            // Fila de emergência: prioridade mais alta primeiro, depois a mais antiga.
+            filtradas.sort(Comparator
+                    .comparing((Consulta c) -> ((AtendimentoEmergencia) c).getPrioridade(),
+                            Comparator.reverseOrder())
+                    .thenComparing(Consulta::getData)
+                    .thenComparing(Consulta::getHorario));
+        }
+        return converter(filtradas);
     }
 
     @Transactional(readOnly = true)
@@ -95,6 +116,16 @@ public class ConsultaService {
         Consulta consulta = obterParaAtualizar(id);
         consulta.iniciar();
         return ConsultaResponse.de(consulta);
+    }
+
+    public ConsultaResponse encaminhar(Long id, Especialidade especialidade) {
+        Consulta consulta = obterParaAtualizar(id);
+        Object real = Hibernate.unproxy(consulta);
+        if (!(real instanceof ConsultaRotina rotina)) {
+            throw new RegraNegocioException("Somente consultas de rotina podem gerar encaminhamento.");
+        }
+        rotina.encaminhar(especialidade);
+        return ConsultaResponse.de(rotina);
     }
 
     public ConsultaResponse confirmar(Long id) {
