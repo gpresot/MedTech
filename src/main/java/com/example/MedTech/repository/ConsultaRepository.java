@@ -24,6 +24,8 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
 
     List<Consulta> findByStatus(StatusConsulta status);
 
+    boolean existsByProfissionalId(Long profissionalId);
+
     @Query("SELECT COUNT(c) FROM Consulta c WHERE c.profissional.id = :profissionalId "
             + "AND c.data = :data AND c.horario = :horario AND c.status <> :cancelada "
             + "AND (:consultaId IS NULL OR c.id <> :consultaId)")
