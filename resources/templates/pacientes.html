@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Pacientes - MedTech</title>
+
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/gestao.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/icon.png}">
+</head>
+
+<body>
+
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="container">
+
+        <header class="cabecalho">
+            <h1>Pacientes</h1>
+            <p>Cadastro de pacientes e consulta do histórico médico</p>
+        </header>
+
+        <!-- FORMULÁRIO (cadastro e edição) -->
+        <section class="caixa">
+            <h2 id="tituloForm">Cadastrar paciente</h2>
+
+            <form id="formPaciente" class="form-grid">
+                <input type="hidden" id="id">
+
+                <div class="campo">
+                    <label for="nome">Nome completo</label>
+                    <input type="text" id="nome" required>
+                </div>
+
+                <div class="campo">
+                    <label for="cpf">CPF</label>
+                    <input type="text" id="cpf" maxlength="14" inputmode="numeric" placeholder="Somente números" required>
+                </div>
+
+                <div class="campo">
+                    <label for="dataNascimento">Data de nascimento</label>
+                    <input type="date" id="dataNascimento" required>
+                </div>
+
+                <div class="campo">
+                    <label for="telefone">Telefone</label>
+                    <input type="tel" id="telefone" placeholder="DDD + número" required>
+                </div>
+
+                <div class="campo">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" required>
+                </div>
+
+                <div class="campo">
+                    <label for="endereco">Endereço</label>
+                    <input type="text" id="endereco" required>
+                </div>
+
+                <div class="campo campo-acoes">
+                    <button type="submit" class="botao">Salvar paciente</button>
+                    <button type="button" id="btnCancelar" class="botao botao-secundario oculto">Cancelar edição</button>
+                </div>
+            </form>
+
+            <p id="mensagemForm" class="mensagem"></p>
+        </section>
+
+        <!-- LISTA -->
+        <section class="caixa">
+            <h2>Pacientes cadastrados</h2>
+            <p id="mensagemLista" class="mensagem"></p>
+            <div id="listaPacientes"></div>
+        </section>
+
+        <!-- HISTÓRICO MÉDICO -->
+        <section class="caixa oculto" id="caixaHistorico">
+
+            <div class="topo-caixa">
+                <h2 id="tituloHistorico">Histórico médico</h2>
+                <button type="button" id="btnFecharHistorico" class="botao botao-secundario">Fechar</button>
+            </div>
+
+            <h3>Informações relevantes</h3>
+            <p id="infoRelevantes" class="texto-historico"></p>
+
+            <form id="formInformacao" class="form-grid" style="margin-top:16px">
+                <div class="campo campo-largo">
+                    <label for="informacao">Adicionar informação ao histórico</label>
+                    <textarea id="informacao" placeholder="Alergias, condições crônicas, observações..." required></textarea>
+                </div>
+                <div class="campo campo-acoes">
+                    <button type="submit" class="botao">Adicionar</button>
+                </div>
+            </form>
+
+            <p id="mensagemHistorico" class="mensagem"></p>
+
+            <h3>Consultas</h3>
+            <div id="histConsultas"></div>
+
+            <h3>Internações</h3>
+            <div id="histInternacoes"></div>
+
+            <h3>Procedimentos cirúrgicos</h3>
+            <div id="histProcedimentos"></div>
+
+        </section>
+
+    </main>
+
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+        const form = document.getElementById("formPaciente");
+        const msgForm = document.getElementById("mensagemForm");
+        const msgLista = document.getElementById("mensagemLista");
+        const btnCancelar = document.getElementById("btnCancelar");
+        const caixaHistorico = document.getElementById("caixaHistorico");
+        const campos = ["nome", "cpf", "dataNascimento", "telefone", "email", "endereco"];
+
+        let pacientes = [];
+        let pacienteDoHistorico = null;
+
+        // ---------- LISTA ----------
+
+        async function carregar() {
+            try {
+                pacientes = await api("/pacientes");
+                desenharPacientes();
+            } catch (erro) {
+                mostrarMensagem(msgLista, erro.message, "erro");
+            }
+        }
+
+        function desenharPacientes() {
+            desenharLista(
+                document.getElementById("listaPacientes"),
+                "Nenhum paciente cadastrado.",
+                ["Nome", "CPF", "Nascimento", "Telefone", "E-mail", "Ações"],
+                pacientes.map(p => [
+                    p.nome,
+                    formatarCpf(p.cpf),
+                    formatarData(p.dataNascimento),
+                    p.telefone,
+                    p.email,
+                    [
+                        el("button", { type: "button", class: "botao", onclick: () => editar(p) }, "Editar"),
+                        el("button", { type: "button", class: "botao botao-secundario", onclick: () => abrirHistorico(p) }, "Histórico"),
+                        el("button", { type: "button", class: "botao botao-perigo", onclick: () => excluir(p) }, "Excluir")
+                    ]
+                ])
+            );
+        }
+
+        // ---------- CADASTRO / EDIÇÃO ----------
+
+        function editar(p) {
+            document.getElementById("id").value = p.id;
+            campos.forEach(c => document.getElementById(c).value = p[c] || "");
+
+            document.getElementById("tituloForm").textContent = "Editar paciente";
+            btnCancelar.classList.remove("oculto");
+            mostrarMensagem(msgForm, "", "");
+            form.scrollIntoView({ behavior: "smooth" });
+        }
+
+        function limparFormulario() {
+            form.reset();
+            document.getElementById("id").value = "";
+            document.getElementById("tituloForm").textContent = "Cadastrar paciente";
+            btnCancelar.classList.add("oculto");
+        }
+
+        btnCancelar.addEventListener("click", () => {
+            limparFormulario();
+            mostrarMensagem(msgForm, "", "");
+        });
+
+        form.addEventListener("submit", async (evento) => {
+            evento.preventDefault();
+
+            const id = document.getElementById("id").value;
+
+            const dados = {
+                nome: document.getElementById("nome").value.trim(),
+                cpf: soNumeros(document.getElementById("cpf").value),
+                dataNascimento: document.getElementById("dataNascimento").value,
+                telefone: soNumeros(document.getElementById("telefone").value),
+                email: document.getElementById("email").value.trim(),
+                endereco: document.getElementById("endereco").value.trim()
+            };
+
+            mostrarMensagem(msgForm, "Salvando...", "");
+
+            try {
+                await api(id ? `/pacientes/${id}` : "/pacientes", {
+                    method: id ? "PUT" : "POST",
+                    body: dados
+                });
+
+                mostrarMensagem(msgForm,
+                    id ? "Paciente atualizado com sucesso!" : "Paciente cadastrado com sucesso!", "sucesso");
+
+                limparFormulario();
+                await carregar();
+
+            } catch (erro) {
+                mostrarMensagem(msgForm, erro.message, "erro");
+            }
+        });
+
+        async function excluir(p) {
+            if (!confirm(`Tem certeza de que deseja excluir o paciente ${p.nome}?`)) {
+                return;
+            }
+
+            try {
+                await api(`/pacientes/${p.id}`, { method: "DELETE" });
+
+                if (pacienteDoHistorico === p.id) {
+                    caixaHistorico.classList.add("oculto");
+                }
+
+                mostrarMensagem(msgLista, "Paciente excluído com sucesso!", "sucesso");
+                await carregar();
+
+            } catch (erro) {
+                mostrarMensagem(msgLista, erro.message, "erro");
+            }
+        }
+
+        // ---------- HISTÓRICO MÉDICO ----------
+
+        async function abrirHistorico(p) {
+            pacienteDoHistorico = p.id;
+            mostrarMensagem(msgLista, "", "");
+
+            try {
+                const historico = await api(`/pacientes/${p.id}/historico`);
+                desenharHistorico(historico);
+
+                caixaHistorico.classList.remove("oculto");
+                caixaHistorico.scrollIntoView({ behavior: "smooth" });
+
+            } catch (erro) {
+                mostrarMensagem(msgLista, erro.message, "erro");
+            }
+        }
+
+        function desenharHistorico(h) {
+            document.getElementById("tituloHistorico").textContent = "Histórico médico — " + h.pacienteNome;
+
+            document.getElementById("infoRelevantes").textContent =
+                h.informacoesRelevantes && h.informacoesRelevantes.trim()
+                    ? h.informacoesRelevantes
+                    : "Nenhuma informação registrada.";
+
+            desenharLista(document.getElementById("histConsultas"), "Nenhuma consulta registrada.",
+                ["Data", "Horário", "Profissional", "Motivo", "Situação"],
+                h.consultas.map(c => [
+                    formatarData(c.data), formatarHora(c.horario),
+                    c.profissionalNome, c.motivo, selo(rotulo(c.status))
+                ]));
+
+            desenharLista(document.getElementById("histInternacoes"), "Nenhuma internação registrada.",
+                ["Entrada", "Previsão de alta", "Alta", "Quarto", "Responsável", "Situação"],
+                h.internacoes.map(i => [
+                    formatarData(i.dataEntrada), formatarData(i.dataPrevistaAlta),
+                    formatarData(i.dataEfetivaAlta), i.quartoNumero, i.profissionalNome,
+                    i.ativa ? selo("Internado", "alerta") : selo("Alta concedida", "ok")
+                ]));
+
+            desenharLista(document.getElementById("histProcedimentos"), "Nenhum procedimento registrado.",
+                ["Data e hora", "Procedimento", "Tipo", "Cirurgião", "Situação"],
+                h.procedimentos.map(p => [
+                    formatarDataHora(p.dataHora), p.descricao, rotulo(p.tipo), p.cirurgiaoNome, selo(rotulo(p.status))
+                ]));
+        }
+
+        document.getElementById("formInformacao").addEventListener("submit", async (evento) => {
+            evento.preventDefault();
+
+            const campo = document.getElementById("informacao");
+            const msg = document.getElementById("mensagemHistorico");
+
+            try {
+                const historico = await api(`/pacientes/${pacienteDoHistorico}/historico/informacoes`, {
+                    method: "POST",
+                    body: { informacao: campo.value.trim() }
+                });
+
+                campo.value = "";
+                desenharHistorico(historico);
+                mostrarMensagem(msg, "Informação adicionada ao histórico.", "sucesso");
+
+            } catch (erro) {
+                mostrarMensagem(msg, erro.message, "erro");
+            }
+        });
+
+        document.getElementById("btnFecharHistorico").addEventListener("click", () => {
+            caixaHistorico.classList.add("oculto");
+        });
+
+        carregar();
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cirurgias - MedTech</title>
+
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/gestao.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/icon.png}">
+</head>
+
+<body>
+
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="container">
+
+        <header class="cabecalho">
+            <h1>Cirurgias</h1>
+            <p>Agendamento e acompanhamento de procedimentos cirúrgicos</p>
+        </header>
+
+        <!-- AGENDAR -->
+        <section class="caixa">
+            <h2>Agendar cirurgia</h2>
+
+            <form id="formProcedimento" class="form-grid">
+
+                <div class="campo">
+                    <label for="internacaoId">Paciente internado</label>
+                    <select id="internacaoId" required></select>
+                </div>
+
+                <div class="campo">
+                    <label for="cirurgiaoId">Cirurgião responsável</label>
+                    <select id="cirurgiaoId" required></select>
+                </div>
+
+                <div class="campo">
+                    <label for="dataHora">Data e hora</label>
+                    <input type="datetime-local" id="dataHora" required>
+                </div>
+
+                <div class="campo">
+                    <label for="tipo">Tipo de cirurgia</label>
+                    <select id="tipo" required>
+                        <option value="ELETIVA">Eletiva</option>
+                        <option value="URGENCIA">Urgência</option>
+                        <option value="EMERGENCIA">Emergência</option>
+                    </select>
+                </div>
+
+                <div class="campo campo-largo">
+                    <label for="descricao">Procedimento</label>
+                    <input type="text" id="descricao" placeholder="Ex.: Apendicectomia" required>
+                </div>
+
+                <div class="campo campo-largo">
+                    <label for="observacoesPreOperatorias">Observações pré-operatórias</label>
+                    <textarea id="observacoesPreOperatorias"
+                        placeholder="Obrigatórias para iniciar a cirurgia (podem ser preenchidas depois)"></textarea>
+                </div>
+
+                <div class="campo campo-acoes">
+                    <button type="submit" class="botao">Agendar cirurgia</button>
+                </div>
+            </form>
+
+            <p class="mensagem" style="color:#526477">
+                Regras: só cirurgiões, paciente com internação ativa, data futura, e sem outra cirurgia
+                do cirurgião ou do paciente em um intervalo de 2 horas. As observações pré-operatórias
+                são obrigatórias para iniciar qualquer cirurgia, inclusive de emergência.
+            </p>
+            <p id="mensagemForm" class="mensagem"></p>
+        </section>
+
+        <!-- AÇÃO (pré-operatório / conclusão) -->
+        <section class="caixa oculto" id="painelAcao"></section>
+
+        <!-- LISTA -->
+        <section class="caixa">
+
+            <div class="topo-caixa">
+                <h2>Procedimentos</h2>
+
+                <label class="filtro">
+                    <input type="checkbox" id="soAtivos" checked>
+                    Mostrar só agendados e em andamento
+                </label>
+            </div>
+
+            <p id="mensagemLista" class="mensagem"></p>
+            <div id="listaProcedimentos"></div>
+        </section>
+
+    </main>
+
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+        const form = document.getElementById("formProcedimento");
+        const msgForm = document.getElementById("mensagemForm");
+        const msgLista = document.getElementById("mensagemLista");
+        const soAtivos = document.getElementById("soAtivos");
+
+        let procedimentos = [];
+
+        // ---------- LISTAS DE SELEÇÃO ----------
+
+        function preencherSelect(id, itens, textoPadrao, textoVazio) {
+            const select = document.getElementById(id);
+
+            if (!itens.length) {
+                select.replaceChildren(el("option", { value: "" }, textoVazio));
+                return;
+            }
+
+            select.replaceChildren(
+                el("option", { value: "" }, textoPadrao),
+                ...itens.map(i => el("option", { value: i.valor }, i.texto))
+            );
+        }
+
+        async function carregarOpcoes() {
+            try {
+                const [internacoes, cirurgioes] = await Promise.all([
+                    api("/internacoes/ativas"),
+                    api("/procedimentos/cirurgioes")
+                ]);
+
+                preencherSelect("internacaoId",
+                    internacoes.map(i => ({ valor: i.id, texto: `${i.pacienteNome} — quarto ${i.quartoNumero}` })),
+                    "Selecione o paciente", "Nenhum paciente internado");
+
+                preencherSelect("cirurgiaoId",
+                    cirurgioes.map(c => ({ valor: c.id, texto: `${c.nome} (CRM ${c.crm})` })),
+                    "Selecione o cirurgião", "Nenhum cirurgião cadastrado");
+
+            } catch (erro) {
+                mostrarMensagem(msgForm, erro.message, "erro");
+            }
+        }
+
+        // ---------- LISTA ----------
+
+        async function carregar() {
+            try {
+                procedimentos = await api("/procedimentos");
+                procedimentos.sort((a, b) => b.dataHora.localeCompare(a.dataHora));
+                desenhar();
+            } catch (erro) {
+                mostrarMensagem(msgLista, erro.message, "erro");
+            }
+        }
+
+        function seloStatus(status) {
+            const tipos = { AGENDADO: "", EM_ANDAMENTO: "alerta", CONCLUIDO: "ok", CANCELADO: "erro" };
+            return selo(rotulo(status), tipos[status]);
+        }
+
+        function seloTipo(tipo) {
+            const tipos = { ELETIVA: "", URGENCIA: "alerta", EMERGENCIA: "erro" };
+            return selo(rotulo(tipo), tipos[tipo]);
+        }
+
+        // Início e fim efetivos, registrados pelo sistema ao iniciar/concluir.
+        function realizacao(p) {
+            if (!p.dataHoraInicioEfetivo) {
+                return "—";
+            }
+
+            return formatarDataHora(p.dataHoraInicioEfetivo) + " → " +
+                (p.dataHoraFimEfetivo ? formatarDataHora(p.dataHoraFimEfetivo) : "em andamento");
+        }
+
+        function botao(texto, classe, acao) {
+            return el("button", { type: "button", class: "botao " + classe, onclick: acao }, texto);
+        }
+
+        function acoes(p) {
+            if (p.status === "AGENDADO") {
+                return [
+                    botao("Pré-operatório", "botao-secundario", () => pedirPreOperatorio(p)),
+                    botao("Iniciar", "", () => iniciar(p)),
+                    botao("Cancelar", "botao-perigo", () => cancelar(p))
+                ];
+            }
+
+            if (p.status === "EM_ANDAMENTO") {
+                return [
+                    botao("Concluir", "", () => pedirConclusao(p)),
+                    botao("Cancelar", "botao-perigo", () => cancelar(p))
+                ];
+            }
+
+            return "—";
+        }
+
+        function desenhar() {
+            const lista = soAtivos.checked
+                ? procedimentos.filter(p => p.status === "AGENDADO" || p.status === "EM_ANDAMENTO")
+                : procedimentos;
+
+            desenharLista(
+                document.getElementById("listaProcedimentos"),
+                soAtivos.checked ? "Nenhuma cirurgia agendada ou em andamento." : "Nenhum procedimento registrado.",
+                ["Data e hora", "Paciente", "Procedimento", "Tipo", "Cirurgião", "Realizada", "Situação", "Ações"],
+                lista.map(p => [
+                    formatarDataHora(p.dataHora),
+                    p.pacienteNome,
+                    el("span", {
+                        title: [p.observacoesPreOperatorias && "Pré: " + p.observacoesPreOperatorias,
+                                p.observacoesPosOperatorias && "Pós: " + p.observacoesPosOperatorias]
+                            .filter(Boolean).join("\n")
+                    }, p.descricao),
+                    seloTipo(p.tipo),
+                    p.cirurgiaoNome,
+                    realizacao(p),
+                    seloStatus(p.status),
+                    acoes(p)
+                ])
+            );
+        }
+
+        // ---------- AGENDAR ----------
+
+        form.addEventListener("submit", async (evento) => {
+            evento.preventDefault();
+
+            const dados = {
+                internacaoId: Number(document.getElementById("internacaoId").value),
+                cirurgiaoId: Number(document.getElementById("cirurgiaoId").value),
+                descricao: document.getElementById("descricao").value.trim(),
+                tipo: document.getElementById("tipo").value,
+                dataHora: document.getElementById("dataHora").value,
+                observacoesPreOperatorias:
+                    document.getElementById("observacoesPreOperatorias").value.trim() || null
+            };
+
+            mostrarMensagem(msgForm, "Agendando cirurgia...", "");
+
+            try {
+                await api("/procedimentos", { method: "POST", body: dados });
+
+                form.reset();
+                mostrarMensagem(msgForm, "Cirurgia agendada com sucesso!", "sucesso");
+                await carregar();
+
+            } catch (erro) {
+                mostrarMensagem(msgForm, erro.message, "erro");
+            }
+        });
+
+        // ---------- ANDAMENTO DA CIRURGIA ----------
+
+        function pedirPreOperatorio(p) {
+            abrirPainel({
+                titulo: `Observações pré-operatórias — ${p.pacienteNome}`,
+                rotulo: "Avaliação e preparo do paciente",
+                tipo: "textarea",
+                valor: p.observacoesPreOperatorias || "",
+                confirmar: "Salvar observações",
+                onConfirmar: async (texto) => {
+                    await api(`/procedimentos/${p.id}/pre-operatorio`, {
+                        method: "PUT",
+                        body: { observacoes: texto }
+                    });
+
+                    mostrarMensagem(msgLista, "Observações pré-operatórias salvas.", "sucesso");
+                    await carregar();
+                }
+            });
+        }
+
+        async function iniciar(p) {
+            try {
+                await api(`/procedimentos/${p.id}/iniciar`, { method: "POST" });
+                mostrarMensagem(msgLista, "Cirurgia iniciada.", "sucesso");
+                await carregar();
+            } catch (erro) {
+                mostrarMensagem(msgLista, erro.message, "erro");
+            }
+        }
+
+        function pedirConclusao(p) {
+            abrirPainel({
+                titulo: `Concluir cirurgia — ${p.pacienteNome}`,
+                rotulo: "Observações pós-operatórias",
+                tipo: "textarea",
+                confirmar: "Concluir cirurgia",
+                onConfirmar: async (texto) => {
+                    await api(`/procedimentos/${p.id}/concluir`, {
+                        method: "POST",
+                        body: { observacoes: texto }
+                    });
+
+                    mostrarMensagem(msgLista, "Cirurgia concluída.", "sucesso");
+                    await carregar();
+                }
+            });
+        }
+
+        async function cancelar(p) {
+            if (!confirm(`Cancelar a cirurgia "${p.descricao}" de ${p.pacienteNome}?`)) {
+                return;
+            }
+
+            try {
+                await api(`/procedimentos/${p.id}/cancelar`, { method: "POST" });
+                mostrarMensagem(msgLista, "Cirurgia cancelada.", "sucesso");
+                await carregar();
+            } catch (erro) {
+                mostrarMensagem(msgLista, erro.message, "erro");
+            }
+        }
+
+        soAtivos.addEventListener("change", desenhar);
+
+        carregarOpcoes();
+        carregar();
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,99 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #F8FAFC;
+    color: #00334F;
+    min-height: 100vh;
+}
+
+main {
+    width: 92%;
+    max-width: 1200px;
+    margin: 40px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.caixa {
+    background-color: #FFFFFF;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 51, 79, 0.08);
+}
+
+.caixa h2 {
+    color: #005380;
+    font-size: 23px;
+    margin-bottom: 25px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+th,
+td {
+    padding: 15px;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+th {
+    background-color: #E8F3F9;
+    color: #00334F;
+    font-weight: 600;
+}
+
+td {
+    color: #526477;
+}
+
+table tr:hover {
+    background-color: #F8FAFC;
+}
+
+.caixa p {
+    color: #526477;
+    padding: 12px 0;
+    border-bottom: 1px solid #E2E8F0;
+    line-height: 1.5;
+}
+
+.caixa p:last-child {
+    border-bottom: none;
+}
+
+.caixa p strong {
+    color: #00334F;
+}
+
+footer {
+    padding: 20px;
+    text-align: center;
+    color: #526477;
+    font-size: 14px;
+}
+
+@media (max-width: 750px) {
+    .caixa {
+        padding: 20px;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .caixa h2 {
+        font-size: 20px;
+    }
+}

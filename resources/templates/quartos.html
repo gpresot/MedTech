@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Quartos - MedTech</title>
+
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/gestao.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/icon.png}">
+</head>
+
+<body>
+
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="container">
+
+        <header class="cabecalho">
+            <h1>Quartos</h1>
+            <p>Gerenciamento de quartos, lotação e manutenção</p>
+        </header>
+
+        <!-- FORMULÁRIO (cadastro e edição) -->
+        <section class="caixa">
+            <h2 id="tituloForm">Cadastrar quarto</h2>
+
+            <form id="formQuarto" class="form-grid">
+                <input type="hidden" id="id">
+
+                <div class="campo">
+                    <label for="numero">Número do quarto</label>
+                    <input type="number" id="numero" min="1" required>
+                </div>
+
+                <div class="campo">
+                    <label for="andar">Andar</label>
+                    <input type="number" id="andar" min="0" required>
+                </div>
+
+                <div class="campo">
+                    <label for="tipo">Tipo de quarto</label>
+                    <select id="tipo" required>
+                        <option value="ENFERMARIA">Enfermaria (até 6 leitos)</option>
+                        <option value="APARTAMENTO">Apartamento (até 2 leitos)</option>
+                        <option value="UTI">UTI (1 leito)</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label for="capacidadeMaxima">Capacidade (leitos)</label>
+                    <input type="number" id="capacidadeMaxima" min="1" max="6" required>
+                </div>
+
+                <div class="campo campo-acoes">
+                    <button type="submit" class="botao">Salvar quarto</button>
+                    <button type="button" id="btnCancelar" class="botao botao-secundario oculto">Cancelar edição</button>
+                </div>
+            </form>
+
+            <p id="mensagemForm" class="mensagem"></p>
+        </section>
+
+        <!-- LISTA -->
+        <section class="caixa">
+
+            <div class="topo-caixa">
+                <h2>Quartos cadastrados</h2>
+
+                <label class="filtro">
+                    <input type="checkbox" id="soDisponiveis">
+                    Mostrar só quartos com vaga
+                </label>
+            </div>
+
+            <p id="mensagemLista" class="mensagem"></p>
+            <div id="listaQuartos"></div>
+        </section>
+
+    </main>
+
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+        const form = document.getElementById("formQuarto");
+        const msgForm = document.getElementById("mensagemForm");
+        const msgLista = document.getElementById("mensagemLista");
+        const btnCancelar = document.getElementById("btnCancelar");
+        const filtro = document.getElementById("soDisponiveis");
+        const campoTipo = document.getElementById("tipo");
+        const campoCapacidade = document.getElementById("capacidadeMaxima");
+
+        // Limite de leitos de cada tipo (mesma regra do backend: TipoQuarto).
+        const LIMITES = { ENFERMARIA: 6, APARTAMENTO: 2, UTI: 1 };
+
+        function aplicarLimite() {
+            const limite = LIMITES[campoTipo.value];
+            campoCapacidade.max = limite;
+
+            if (Number(campoCapacidade.value) > limite) {
+                campoCapacidade.value = limite;
+            }
+        }
+
+        campoTipo.addEventListener("change", aplicarLimite);
+
+        async function carregar() {
+            try {
+                const quartos = await api(filtro.checked ? "/quartos/disponiveis" : "/quartos");
+                quartos.sort((a, b) => a.andar - b.andar || a.numero - b.numero);
+                desenhar(quartos);
+            } catch (erro) {
+                mostrarMensagem(msgLista, erro.message, "erro");
+            }
+        }
+
+        function seloStatus(status) {
+            const tipos = { DISPONIVEL: "ok", OCUPADO: "alerta", MANUTENCAO: "erro" };
+            return selo(rotulo(status), tipos[status]);
+        }
+
+        function desenhar(quartos) {
+            desenharLista(
+                document.getElementById("listaQuartos"),
+                filtro.checked ? "Nenhum quarto com vaga no momento." : "Nenhum quarto cadastrado.",
+                ["Número", "Tipo", "Andar", "Ocupação", "Vagas", "Situação", "Ações"],
+                quartos.map(q => [
+                    q.numero,
+                    rotulo(q.tipo),
+                    q.andar + "º",
+                    `${q.ocupacaoAtual} / ${q.capacidadeMaxima}`,
+                    q.vagasDisponiveis,
+                    seloStatus(q.status),
+                    [
+                        el("button", { type: "button", class: "botao", onclick: () => editar(q) }, "Editar"),
+                        el("button", {
+                            type: "button",
+                            class: "botao botao-secundario",
+                            onclick: () => alterarStatus(q)
+                        }, q.status === "MANUTENCAO" ? "Liberar" : "Manutenção"),
+                        el("button", { type: "button", class: "botao botao-perigo", onclick: () => excluir(q) }, "Excluir")
+                    ]
+                ])
+            );
+        }
+
+        function editar(q) {
+            document.getElementById("id").value = q.id;
+            document.getElementById("numero").value = q.numero;
+            document.getElementById("andar").value = q.andar;
+            campoTipo.value = q.tipo;
+            aplicarLimite();
+            document.getElementById("capacidadeMaxima").value = q.capacidadeMaxima;
+
+            document.getElementById("tituloForm").textContent = "Editar quarto " + q.numero;
+            btnCancelar.classList.remove("oculto");
+            mostrarMensagem(msgForm, "", "");
+            form.scrollIntoView({ behavior: "smooth" });
+        }
+
+        function limparFormulario() {
+            form.reset();
+            document.getElementById("id").value = "";
+            aplicarLimite();
+            document.getElementById("tituloForm").textContent = "Cadastrar quarto";
+            btnCancelar.classList.add("oculto");
+        }
+
+        btnCancelar.addEventListener("click", () => {
+            limparFormulario();
+            mostrarMensagem(msgForm, "", "");
+        });
+
+        form.addEventListener("submit", async (evento) => {
+            evento.preventDefault();
+
+            const id = document.getElementById("id").value;
+
+            const dados = {
+                numero: Number(document.getElementById("numero").value),
+                andar: Number(document.getElementById("andar").value),
+                tipo: campoTipo.value,
+                capacidadeMaxima: Number(campoCapacidade.value)
+            };
+
+            mostrarMensagem(msgForm, "Salvando...", "");
+
+            try {
+                await api(id ? `/quartos/${id}` : "/quartos", {
+                    method: id ? "PUT" : "POST",
+                    body: dados
+                });
+
+                mostrarMensagem(msgForm,
+                    id ? "Quarto atualizado com sucesso!" : "Quarto cadastrado com sucesso!", "sucesso");
+
+                limparFormulario();
+                await carregar();
+
+            } catch (erro) {
+                mostrarMensagem(msgForm, erro.message, "erro");
+            }
+        });
+
+        async function alterarStatus(q) {
+            const novo = q.status === "MANUTENCAO" ? "DISPONIVEL" : "MANUTENCAO";
+
+            try {
+                await api(`/quartos/${q.id}/status`, { method: "PUT", body: { status: novo } });
+
+                mostrarMensagem(msgLista,
+                    novo === "MANUTENCAO"
+                        ? `Quarto ${q.numero} em manutenção.`
+                        : `Quarto ${q.numero} liberado.`, "sucesso");
+
+                await carregar();
+
+            } catch (erro) {
+                mostrarMensagem(msgLista, erro.message, "erro");
+            }
+        }
+
+        async function excluir(q) {
+            if (!confirm(`Tem certeza de que deseja excluir o quarto ${q.numero}?`)) {
+                return;
+            }
+
+            try {
+                await api(`/quartos/${q.id}`, { method: "DELETE" });
+                mostrarMensagem(msgLista, "Quarto excluído com sucesso!", "sucesso");
+                await carregar();
+
+            } catch (erro) {
+                mostrarMensagem(msgLista, erro.message, "erro");
+            }
+        }
+
+        filtro.addEventListener("change", carregar);
+
+        carregar();
+    </script>
+
+</body>
+
+</html>

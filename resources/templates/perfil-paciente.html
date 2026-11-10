@@ -1,0 +1,331 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Perfil do Paciente - MedTech</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/perfil.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/icon.png}">
+</head>
+
+<body>
+
+    <!-- CABEÇALHO -->
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+
+    <!-- CONTEÚDO PRINCIPAL -->
+
+    <main class="perfil-container">
+
+        <h1 class="perfil-title">
+            Perfil do Paciente
+        </h1>
+
+
+        <div class="perfil-alerta perfil-alerta-sucesso" th:if="${perfilSucesso}" th:text="${perfilSucesso}"></div>
+        <div class="perfil-alerta perfil-alerta-erro" th:if="${perfilErro}" th:text="${perfilErro}"></div>
+
+
+        <!-- IDENTIFICAÇÃO DO PACIENTE -->
+
+        <section class="perfil-identificacao">
+
+            <div class="perfil-foto">
+                <span>👤</span>
+            </div>
+
+            <div class="perfil-nome">
+
+                <h2 th:text="${paciente.nome()}">
+                    Nome do paciente
+                </h2>
+
+                <p>
+                    Paciente
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- INFORMAÇÕES PESSOAIS -->
+
+        <section class="perfil-card">
+
+            <h2>
+                Informações pessoais
+            </h2>
+
+            <div class="perfil-info-grid">
+
+                <div class="perfil-info">
+                    <span>Nome</span>
+
+                    <strong th:text="${paciente.nome()}">
+                        Nome do paciente
+                    </strong>
+                </div>
+
+
+                <div class="perfil-info">
+                    <span>CPF</span>
+
+                    <strong th:text="${paciente.cpf().substring(0,3) + '.' + paciente.cpf().substring(3,6) + '.' + paciente.cpf().substring(6,9) + '-' + paciente.cpf().substring(9)}">
+                        CPF do paciente
+                    </strong>
+                </div>
+
+
+                <div class="perfil-info">
+                    <span>Data de nascimento</span>
+
+                    <strong th:text="${#temporals.format(paciente.dataNascimento(), 'dd/MM/yyyy')}">
+                        Data de nascimento
+                    </strong>
+                </div>
+
+
+                <div class="perfil-info">
+                    <span>Telefone</span>
+
+                    <strong th:text="${paciente.telefone()}">
+                        Telefone do paciente
+                    </strong>
+                </div>
+
+
+                <div class="perfil-info">
+                    <span>E-mail</span>
+
+                    <strong th:text="${paciente.email()}">
+                        E-mail do paciente
+                    </strong>
+                </div>
+
+
+                <div class="perfil-info">
+                    <span>Endereço</span>
+
+                    <strong th:text="${paciente.endereco()}">
+                        Endereço do paciente
+                    </strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- AÇÕES -->
+
+        <section class="perfil-acoes">
+
+            <button type="button" id="btn-editar" class="perfil-button perfil-button-primary">
+                Editar perfil
+            </button>
+
+            <a href="#consultas" class="perfil-button">
+                Ver consultas
+            </a>
+
+            <a href="#historico" class="perfil-button">
+                Histórico médico
+            </a>
+
+        </section>
+
+
+        <!-- EDITAR CONTATO -->
+
+        <section id="editar-contato" class="perfil-card"
+                 th:classappend="${perfilErro == null} ? 'oculto' : ''">
+
+            <h2>
+                Editar contato
+            </h2>
+
+            <form th:action="@{/perfil/paciente}" method="post" class="perfil-form">
+
+                <label for="telefone">Telefone</label>
+                <input type="tel" id="telefone" name="telefone"
+                       th:value="${paciente.telefone()}" required>
+
+                <label for="endereco">Endereço</label>
+                <input type="text" id="endereco" name="endereco"
+                       th:value="${paciente.endereco()}" required>
+
+                <p class="perfil-nota">
+                    O e-mail é o seu login e não pode ser alterado por aqui.
+                </p>
+
+                <div class="perfil-acoes">
+                    <button type="submit" class="perfil-button perfil-button-primary">
+                        Salvar alterações
+                    </button>
+
+                    <button type="button" id="btn-cancelar" class="perfil-button">
+                        Cancelar
+                    </button>
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- CONSULTAS -->
+
+        <section id="consultas" class="perfil-card">
+
+            <h2>
+                Minhas consultas
+            </h2>
+
+            <p class="perfil-vazio" th:if="${#lists.isEmpty(historico.consultas())}">
+                Nenhuma consulta registrada.
+            </p>
+
+            <div class="perfil-tabela-container" th:unless="${#lists.isEmpty(historico.consultas())}">
+                <table class="perfil-tabela">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Profissional</th>
+                            <th>Motivo</th>
+                            <th>Situação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="c : ${historico.consultas()}">
+                            <td th:text="${#temporals.format(c.data(), 'dd/MM/yyyy')}"></td>
+                            <td th:text="${#temporals.format(c.horario(), 'HH:mm')}"></td>
+                            <td th:text="${c.profissionalNome()}"></td>
+                            <td th:text="${c.motivo()}"></td>
+                            <td>
+                                <span class="perfil-status"
+                                      th:text="${@rotulos.de(c.status())}"></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </section>
+
+
+        <!-- HISTÓRICO MÉDICO -->
+
+        <section id="historico" class="perfil-card">
+
+            <h2>
+                Histórico médico
+            </h2>
+
+            <h3 class="perfil-subtitulo">Informações relevantes</h3>
+
+            <p class="perfil-vazio" th:if="${#strings.isEmpty(historico.informacoesRelevantes())}">
+                Nenhuma informação registrada.
+            </p>
+
+            <p class="perfil-texto" th:unless="${#strings.isEmpty(historico.informacoesRelevantes())}"
+               th:text="${historico.informacoesRelevantes()}"></p>
+
+            <h3 class="perfil-subtitulo">Internações</h3>
+
+            <p class="perfil-vazio" th:if="${#lists.isEmpty(historico.internacoes())}">
+                Nenhuma internação registrada.
+            </p>
+
+            <div class="perfil-tabela-container" th:unless="${#lists.isEmpty(historico.internacoes())}">
+                <table class="perfil-tabela">
+                    <thead>
+                        <tr>
+                            <th>Entrada</th>
+                            <th>Previsão de alta</th>
+                            <th>Alta</th>
+                            <th>Quarto</th>
+                            <th>Responsável</th>
+                            <th>Situação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="i : ${historico.internacoes()}">
+                            <td th:text="${#temporals.format(i.dataEntrada(), 'dd/MM/yyyy')}"></td>
+                            <td th:text="${i.dataPrevistaAlta() != null ? #temporals.format(i.dataPrevistaAlta(), 'dd/MM/yyyy') : '—'}"></td>
+                            <td th:text="${i.dataEfetivaAlta() != null ? #temporals.format(i.dataEfetivaAlta(), 'dd/MM/yyyy') : '—'}"></td>
+                            <td th:text="${i.quartoNumero()}"></td>
+                            <td th:text="${i.profissionalNome()}"></td>
+                            <td>
+                                <span class="perfil-status" th:text="${i.ativa() ? 'Internado' : 'Alta concedida'}"></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="perfil-subtitulo">Procedimentos cirúrgicos</h3>
+
+            <p class="perfil-vazio" th:if="${#lists.isEmpty(historico.procedimentos())}">
+                Nenhum procedimento registrado.
+            </p>
+
+            <div class="perfil-tabela-container" th:unless="${#lists.isEmpty(historico.procedimentos())}">
+                <table class="perfil-tabela">
+                    <thead>
+                        <tr>
+                            <th>Data e hora</th>
+                            <th>Procedimento</th>
+                            <th>Tipo</th>
+                            <th>Cirurgião</th>
+                            <th>Situação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${historico.procedimentos()}">
+                            <td th:text="${#temporals.format(p.dataHora(), 'dd/MM/yyyy HH:mm')}"></td>
+                            <td th:text="${p.descricao()}"></td>
+                            <td th:text="${@rotulos.de(p.tipo())}"></td>
+                            <td th:text="${p.cirurgiaoNome()}"></td>
+                            <td>
+                                <span class="perfil-status"
+                                      th:text="${@rotulos.de(p.status())}"></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        const cartaoEdicao = document.getElementById("editar-contato");
+
+        document.getElementById("btn-editar").addEventListener("click", () => {
+            cartaoEdicao.classList.remove("oculto");
+            cartaoEdicao.scrollIntoView({ behavior: "smooth" });
+        });
+
+        document.getElementById("btn-cancelar").addEventListener("click", () => {
+            cartaoEdicao.classList.add("oculto");
+        });
+    </script>
+
+</body>
+
+</html>

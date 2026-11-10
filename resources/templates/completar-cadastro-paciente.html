@@ -1,0 +1,76 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Complete seu cadastro - MedTech</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/perfil.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/icon.png}">
+</head>
+
+<body>
+
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="perfil-container">
+
+        <h1 class="perfil-title">
+            Complete seu cadastro
+        </h1>
+
+        <div class="perfil-alerta perfil-alerta-erro" th:if="${perfilErro}" th:text="${perfilErro}"></div>
+
+        <section class="perfil-card">
+
+            <h2>
+                Dados do paciente
+            </h2>
+
+            <p class="perfil-nota">
+                Sua conta foi criada antes do cadastro completo de pacientes.
+                Preencha os dados abaixo para acessar seu perfil e seu histórico médico.
+            </p>
+
+            <form th:action="@{/perfil/paciente/completar}" method="post" class="perfil-form">
+
+                <label for="email">E-mail</label>
+                <input type="email" id="email" th:value="${email}" disabled>
+
+                <label for="nome">Nome completo</label>
+                <input type="text" id="nome" name="nome" required>
+
+                <label for="cpf">CPF</label>
+                <input type="text" id="cpf" name="cpf" placeholder="999.999.999-99" required>
+
+                <label for="dataNascimento">Data de nascimento</label>
+                <input type="date" id="dataNascimento" name="dataNascimento" required>
+
+                <label for="telefone">Telefone</label>
+                <input type="tel" id="telefone" name="telefone" placeholder="(31) 99999-9999" required>
+
+                <label for="endereco">Endereço</label>
+                <input type="text" id="endereco" name="endereco" required>
+
+                <div class="perfil-acoes">
+                    <button type="submit" class="perfil-button perfil-button-primary">
+                        Salvar cadastro
+                    </button>
+                </div>
+
+            </form>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

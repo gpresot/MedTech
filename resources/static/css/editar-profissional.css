@@ -1,0 +1,105 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #F8FAFC;
+    color: #00334F;
+    min-height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 650px;
+    margin: 45px auto;
+}
+
+.cabecalho {
+    margin-bottom: 25px;
+}
+
+.cabecalho h1 {
+    color: #005380;
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.cabecalho p {
+    color: #526477;
+    line-height: 1.5;
+}
+
+#formEditarProfissional {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 30px;
+    background-color: #FFFFFF;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 51, 79, 0.08);
+}
+
+#formEditarProfissional label {
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+#formEditarProfissional input,
+#formEditarProfissional select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #CBD5E1;
+    border-radius: 7px;
+    font-size: 15px;
+    background-color: #FFFFFF;
+    color: #1E293B;
+    outline: none;
+}
+
+#formEditarProfissional input:focus,
+#formEditarProfissional select:focus {
+    border-color: #005380;
+    box-shadow: 0 0 0 3px rgba(0, 83, 128, 0.12);
+}
+
+#formEditarProfissional button {
+    margin-top: 20px;
+    padding: 13px;
+    border: none;
+    border-radius: 7px;
+    background-color: #005380;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#formEditarProfissional button:hover {
+    background-color: #00334F;
+}
+
+#mensagem {
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+    .container {
+        width: 94%;
+        margin: 25px auto;
+    }
+
+    #formEditarProfissional {
+        padding: 20px;
+    }
+
+    .cabecalho h1 {
+        font-size: 23px;
+    }
+}

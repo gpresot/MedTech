@@ -1,0 +1,308 @@
+/* ========================================
+   PÁGINAS DE GESTÃO (pacientes, quartos,
+   internações e cirurgias)
+   Mesma paleta e componentes de profissionais.css
+======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #F8FAFC;
+    color: #00334F;
+    min-height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 1400px;
+    margin: 40px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.cabecalho h1 {
+    color: #005380;
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.cabecalho p {
+    color: #526477;
+    font-size: 16px;
+}
+
+.oculto {
+    display: none !important;
+}
+
+/* ---------- CAIXAS ---------- */
+
+.caixa {
+    background-color: #FFFFFF;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 51, 79, 0.08);
+}
+
+.caixa h2 {
+    color: #005380;
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+.caixa h3 {
+    color: #00334F;
+    font-size: 16px;
+    margin: 25px 0 12px;
+}
+
+.topo-caixa {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.topo-caixa h2 {
+    margin-bottom: 0;
+}
+
+.filtro {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #526477;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* ---------- FORMULÁRIOS ---------- */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    align-items: end;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+
+.campo-largo {
+    grid-column: 1 / -1;
+}
+
+.campo label {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #CBD5E1;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 14px;
+    background-color: #FFFFFF;
+    color: #1E293B;
+    outline: none;
+}
+
+.campo textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+    border-color: #005380;
+    box-shadow: 0 0 0 3px rgba(0, 83, 128, 0.12);
+}
+
+.campo-acoes {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.mensagem {
+    margin-top: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 20px;
+}
+
+.mensagem.sucesso {
+    color: #1B6B3A;
+}
+
+.mensagem.erro {
+    color: #A12727;
+}
+
+/* ---------- BOTÕES ---------- */
+
+.botao {
+    display: inline-block;
+    background-color: #005380;
+    color: #FFFFFF;
+    padding: 11px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.botao:hover {
+    background-color: #00334F;
+}
+
+.botao-secundario {
+    background-color: #FFFFFF;
+    color: #005380;
+    border: 1px solid #005380;
+}
+
+.botao-secundario:hover {
+    background-color: #E8F3F9;
+}
+
+.botao-perigo {
+    background-color: #DC3545;
+}
+
+.botao-perigo:hover {
+    background-color: #B02A37;
+}
+
+td .botao {
+    margin: 2px 4px 2px 0;
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+/* ---------- TABELAS ---------- */
+
+.tabela-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+}
+
+thead {
+    background-color: #E8F3F9;
+}
+
+th {
+    color: #00334F;
+    font-weight: 700;
+    text-align: left;
+    padding: 14px 12px;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+td {
+    color: #526477;
+    padding: 13px 12px;
+    border-bottom: 1px solid #E5EAF0;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+tbody tr:hover {
+    background-color: #F8FAFC;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.vazio {
+    color: #526477;
+    font-size: 14px;
+    padding: 12px 0;
+}
+
+.texto-historico {
+    color: #00334F;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+/* ---------- SITUAÇÕES ---------- */
+
+.status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background-color: #E8F3F9;
+    color: #005380;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-ok {
+    background-color: #E6F6EC;
+    color: #1B6B3A;
+}
+
+.status-alerta {
+    background-color: #FFF4DB;
+    color: #8A5A00;
+}
+
+.status-erro {
+    background-color: #FDECEC;
+    color: #A12727;
+}
+
+/* ---------- RESPONSIVO ---------- */
+
+@media (max-width: 768px) {
+    .container {
+        width: 94%;
+        margin: 25px auto;
+    }
+
+    .cabecalho h1 {
+        font-size: 26px;
+    }
+
+    .caixa {
+        padding: 18px;
+    }
+
+    .caixa h2 {
+        font-size: 19px;
+    }
+}
