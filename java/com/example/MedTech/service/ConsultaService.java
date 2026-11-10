@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.MedTech.dto.ConsultaRequest;
 import com.example.MedTech.dto.ConsultaResponse;
-import com.example.MedTech.enums.StatusConsulta;
+import com.example.MedTech.enums.StatusAtendimento;
 import com.example.MedTech.enums.TipoConsulta;
 import com.example.MedTech.exception.RecursoNaoEncontradoException;
 import com.example.MedTech.exception.RegraNegocioException;
@@ -40,7 +40,7 @@ public class ConsultaService {
     }
 
     @Transactional(readOnly = true)
-    public List<ConsultaResponse> listarPorStatus(StatusConsulta status) {
+    public List<ConsultaResponse> listarPorStatus(StatusAtendimento status) {
         return converter(consultaRepository.findByStatus(status));
     }
 
@@ -139,7 +139,7 @@ public class ConsultaService {
 
     private void verificarHorario(ConsultaRequest req, Long consultaId) {
         if (consultaRepository.contarConflitos(req.profissionalId(), req.data(), req.horario(),
-                StatusConsulta.CANCELADA, consultaId) > 0) {
+                StatusAtendimento.CANCELADO, consultaId) > 0) {
             throw new RegraNegocioException("O profissional já possui uma consulta nesse horário.");
         }
     }

@@ -2,7 +2,7 @@ package com.example.MedTech.dto;
 
 import java.time.LocalDateTime;
 
-import com.example.MedTech.enums.StatusProcedimento;
+import com.example.MedTech.enums.StatusAtendimento;
 import com.example.MedTech.enums.TipoCirurgia;
 import com.example.MedTech.model.ProcedimentoCirurgico;
 
@@ -18,7 +18,7 @@ public record ProcedimentoResponse(
         LocalDateTime dataHora,
         LocalDateTime dataHoraInicioEfetivo,
         LocalDateTime dataHoraFimEfetivo,
-        StatusProcedimento status,
+        StatusAtendimento status,
         String observacoesPreOperatorias,
         String observacoesPosOperatorias) {
 

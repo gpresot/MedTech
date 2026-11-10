@@ -2,7 +2,6 @@
 package com.example.MedTech.model;
 
 import jakarta.persistence.*;
-import com.example.MedTech.enums.TipoUsuario;
 
 @Entity
 @Table(name = "usuarios")
@@ -18,17 +17,12 @@ public class Usuario {
     @Column(nullable = false)
     private String senha;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TipoUsuario tipo;
-
     public Usuario() {
     }
 
-    public Usuario(String email, String senha, TipoUsuario tipo) {
+    public Usuario(String email, String senha) {
         this.email = email;
         this.senha = senha;
-        this.tipo = tipo;
     }
 
     public Long getId() {
@@ -49,13 +43,5 @@ public class Usuario {
 
     public void setSenha(String senha) {
         this.senha = senha;
-    }
-
-    public TipoUsuario getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(TipoUsuario tipo) {
-        this.tipo = tipo;
     }
 }

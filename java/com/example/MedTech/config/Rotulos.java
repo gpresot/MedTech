@@ -12,16 +12,12 @@ import org.springframework.stereotype.Component;
 public class Rotulos {
 
     private static final Map<String, String> TEXTOS = Map.ofEntries(
-            Map.entry("AGENDADA", "Agendada"),
-            Map.entry("CONFIRMADA", "Confirmada"),
-            Map.entry("EM_ATENDIMENTO", "Em atendimento"),
-            Map.entry("CONCLUIDA", "Concluída"),
-            Map.entry("CANCELADA", "Cancelada"),
-            Map.entry("NAO_COMPARECEU", "Não compareceu"),
             Map.entry("AGENDADO", "Agendado"),
+            Map.entry("CONFIRMADO", "Confirmado"),
             Map.entry("EM_ANDAMENTO", "Em andamento"),
             Map.entry("CONCLUIDO", "Concluído"),
             Map.entry("CANCELADO", "Cancelado"),
+            Map.entry("NAO_COMPARECEU", "Não compareceu"),
             Map.entry("ELETIVA", "Eletiva"),
             Map.entry("URGENCIA", "Urgência"),
             Map.entry("EMERGENCIA", "Emergência"),

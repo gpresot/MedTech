@@ -2,7 +2,7 @@ package com.example.MedTech.model;
 
 import java.time.LocalDateTime;
 
-import com.example.MedTech.enums.StatusProcedimento;
+import com.example.MedTech.enums.StatusAtendimento;
 import com.example.MedTech.enums.TipoCirurgia;
 import com.example.MedTech.exception.RegraNegocioException;
 
@@ -49,7 +49,7 @@ public class ProcedimentoCirurgico extends Atendimento {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private StatusProcedimento status = StatusProcedimento.AGENDADO;
+    private StatusAtendimento status = StatusAtendimento.AGENDADO;
 
     @Column(columnDefinition = "TEXT")
     private String observacoesPreOperatorias;
@@ -92,11 +92,11 @@ public class ProcedimentoCirurgico extends Atendimento {
     }
 
     public boolean estaAtivo() {
-        return status == StatusProcedimento.AGENDADO || status == StatusProcedimento.EM_ANDAMENTO;
+        return status == StatusAtendimento.AGENDADO || status == StatusAtendimento.EM_ANDAMENTO;
     }
 
     public void registrarObservacoesPreOperatorias(String observacoes) {
-        if (status != StatusProcedimento.AGENDADO) {
+        if (status != StatusAtendimento.AGENDADO) {
             throw new RegraNegocioException(
                     "Observações pré-operatórias só podem ser alteradas antes do início da cirurgia.");
         }
@@ -104,7 +104,7 @@ public class ProcedimentoCirurgico extends Atendimento {
     }
 
     public void iniciar() {
-        if (status != StatusProcedimento.AGENDADO) {
+        if (status != StatusAtendimento.AGENDADO) {
             throw new RegraNegocioException("Apenas cirurgias agendadas podem ser iniciadas.");
         }
         if (observacoesPreOperatorias == null || observacoesPreOperatorias.isBlank()) {
@@ -112,25 +112,25 @@ public class ProcedimentoCirurgico extends Atendimento {
                     "Registre as observações pré-operatórias antes de iniciar a cirurgia.");
         }
         this.dataHoraInicioEfetivo = LocalDateTime.now();
-        this.status = StatusProcedimento.EM_ANDAMENTO;
+        this.status = StatusAtendimento.EM_ANDAMENTO;
     }
 
     public void concluir(String observacoesPos) {
-        if (status != StatusProcedimento.EM_ANDAMENTO) {
+        if (status != StatusAtendimento.EM_ANDAMENTO) {
             throw new RegraNegocioException(
                     "Apenas cirurgias em andamento podem ser concluídas.");
         }
         this.observacoesPosOperatorias = observacoesPos;
         this.dataHoraFimEfetivo = LocalDateTime.now();
-        this.status = StatusProcedimento.CONCLUIDO;
+        this.status = StatusAtendimento.CONCLUIDO;
     }
 
     public void cancelar() {
-        if (status == StatusProcedimento.CONCLUIDO || status == StatusProcedimento.CANCELADO) {
+        if (status == StatusAtendimento.CONCLUIDO || status == StatusAtendimento.CANCELADO) {
             throw new RegraNegocioException(
                     "Cirurgias concluídas ou já canceladas não podem ser canceladas.");
         }
-        this.status = StatusProcedimento.CANCELADO;
+        this.status = StatusAtendimento.CANCELADO;
     }
 
     public Long getId() { return id; }
@@ -145,7 +145,7 @@ public class ProcedimentoCirurgico extends Atendimento {
     public LocalDateTime getDataHora() { return dataHora; }
     public LocalDateTime getDataHoraInicioEfetivo() { return dataHoraInicioEfetivo; }
     public LocalDateTime getDataHoraFimEfetivo() { return dataHoraFimEfetivo; }
-    public StatusProcedimento getStatus() { return status; }
+    public StatusAtendimento getStatus() { return status; }
     public String getObservacoesPreOperatorias() { return observacoesPreOperatorias; }
     public String getObservacoesPosOperatorias() { return observacoesPosOperatorias; }
 }
