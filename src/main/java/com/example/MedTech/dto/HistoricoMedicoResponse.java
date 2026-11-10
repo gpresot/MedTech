@@ -6,6 +6,7 @@ public record HistoricoMedicoResponse(
         Long pacienteId,
         String pacienteNome,
         String informacoesRelevantes,
+        List<ConsultaResponse> consultas,
         List<InternacaoResponse> internacoes,
         List<ProcedimentoResponse> procedimentos) {
 }

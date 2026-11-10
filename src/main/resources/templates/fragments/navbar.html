@@ -19,31 +19,60 @@
                     Início
                 </a>
 
-                <a th:href="@{/profissionais/pagina}"
-                    th:classappend="${paginaAtual == 'profissionais'} ? ' ativo' : ''">
-                    Profissionais
-                </a>
+                <!-- Só profissionais veem as páginas de gestão -->
+                <th:block th:if="${logado == true and ehPaciente != true}">
 
-                <a th:href="@{/consultas/pagina}" th:classappend="${paginaAtual == 'consultas'} ? ' ativo' : ''">
-                    Consultas
-                </a>
+                    <a th:href="@{/profissionais/pagina}"
+                        th:classappend="${paginaAtual == 'profissionais'} ? ' ativo' : ''">
+                        Profissionais
+                    </a>
 
-                <a th:href="@{/internacoes/pagina}" th:classappend="${paginaAtual == 'internacoes'} ? ' ativo' : ''">
-                    Internações
-                </a>
+                    <a th:href="@{/pacientes/pagina}"
+                        th:classappend="${paginaAtual == 'pacientes'} ? ' ativo' : ''">
+                        Pacientes
+                    </a>
 
-                <a th:href="@{/perfil/doutor}" th:classappend="${paginaAtual == 'perfil'} ? ' ativo' : ''">
+                    <a th:href="@{/consultas/pagina}"
+                        th:classappend="${paginaAtual == 'consultas'} ? ' ativo' : ''">
+                        Consultas
+                    </a>
+
+                    <a th:href="@{/internacoes/pagina}"
+                        th:classappend="${paginaAtual == 'internacoes'} ? ' ativo' : ''">
+                        Internações
+                    </a>
+
+                    <a th:href="@{/procedimentos/pagina}"
+                        th:classappend="${paginaAtual == 'procedimentos'} ? ' ativo' : ''">
+                        Cirurgias
+                    </a>
+
+                    <a th:href="@{/quartos/pagina}"
+                        th:classappend="${paginaAtual == 'quartos'} ? ' ativo' : ''">
+                        Quartos
+                    </a>
+
+                </th:block>
+
+                <a th:if="${logado == true}" th:href="@{${perfilUrl}}"
+                    th:classappend="${paginaAtual == 'perfil'} ? ' ativo' : ''">
                     Meu perfil
                 </a>
 
             </nav>
 
-            <!-- LOGOUT -->
-            <form th:action="@{/logout}" method="post" class="navbar-logout">
+            <!-- SAIR (logado) / ENTRAR (visitante) -->
+            <form th:if="${logado == true}" th:action="@{/logout}" method="post" class="navbar-logout">
                 <button type="submit">
                     Sair
                 </button>
             </form>
+
+            <div th:unless="${logado == true}" class="navbar-logout">
+                <a th:href="@{/login}" class="navbar-entrar">
+                    Entrar
+                </a>
+            </div>
 
         </div>
 

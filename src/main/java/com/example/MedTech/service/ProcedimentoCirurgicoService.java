@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.MedTech.dto.ProcedimentoRequest;
+import com.example.MedTech.dto.ProfissionalResumoResponse;
 import com.example.MedTech.dto.ProcedimentoResponse;
 import com.example.MedTech.enums.StatusAtendimento;
 import com.example.MedTech.enums.TipoCirurgia;
@@ -17,6 +18,7 @@ import com.example.MedTech.exception.RegraNegocioException;
 import com.example.MedTech.model.Cirurgiao;
 import com.example.MedTech.model.Internacao;
 import com.example.MedTech.model.ProcedimentoCirurgico;
+import com.example.MedTech.repository.CirurgiaoRepository;
 import com.example.MedTech.repository.InternacaoRepository;
 import com.example.MedTech.repository.ProcedimentoCirurgicoRepository;
 import com.example.MedTech.repository.ProfissionalRepository;
@@ -43,13 +45,22 @@ public class ProcedimentoCirurgicoService {
     private final ProcedimentoCirurgicoRepository procedimentoRepository;
     private final InternacaoRepository internacaoRepository;
     private final ProfissionalRepository profissionalRepository;
+    private final CirurgiaoRepository cirurgiaoRepository;
 
     public ProcedimentoCirurgicoService(ProcedimentoCirurgicoRepository procedimentoRepository,
             InternacaoRepository internacaoRepository,
-            ProfissionalRepository profissionalRepository) {
+            ProfissionalRepository profissionalRepository,
+            CirurgiaoRepository cirurgiaoRepository) {
         this.procedimentoRepository = procedimentoRepository;
         this.internacaoRepository = internacaoRepository;
         this.profissionalRepository = profissionalRepository;
+        this.cirurgiaoRepository = cirurgiaoRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProfissionalResumoResponse> listarCirurgioes() {
+        return cirurgiaoRepository.findAllByOrderByNomeAsc().stream()
+                .map(ProfissionalResumoResponse::de).toList();
     }
 
     @Transactional(readOnly = true)

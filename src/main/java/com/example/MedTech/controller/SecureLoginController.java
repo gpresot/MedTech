@@ -1,13 +1,11 @@
 
 package com.example.MedTech.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.example.MedTech.model.Usuario;
 import com.example.MedTech.model.Profissional;
-import com.example.MedTech.repository.UsuarioRepository;
 import com.example.MedTech.repository.ProfissionalRepository;
 import com.example.MedTech.service.CadastroService;
 
@@ -28,24 +24,14 @@ public class SecureLoginController {
     private static final String EMAIL_REGEX =
             "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
 
-    private final PasswordEncoder passwordEncoder;
     private final CadastroService cadastroService;
-    private final UsuarioRepository usuarioRepository;
     private final ProfissionalRepository profissionalRepository;
 
-    // Dados complementares do paciente ainda temporários.
-    private final Map<String, Map<String, String>> dadosUsuarios =
-            new ConcurrentHashMap<>();
-
     public SecureLoginController(
-            PasswordEncoder passwordEncoder,
             CadastroService cadastroService,
-            UsuarioRepository usuarioRepository,
             ProfissionalRepository profissionalRepository) {
 
-        this.passwordEncoder = passwordEncoder;
         this.cadastroService = cadastroService;
-        this.usuarioRepository = usuarioRepository;
         this.profissionalRepository = profissionalRepository;
     }
 
@@ -89,28 +75,67 @@ public class SecureLoginController {
             @RequestParam("senha") String senha,
             RedirectAttributes ra) {
 
-        if (cpf.isBlank() || dataNascimento.isBlank()
-                || endereco.isBlank()) {
+        if (nome.isBlank() || cpf.isBlank() || dataNascimento.isBlank()
+                || telefone.isBlank() || email.isBlank()
+                || endereco.isBlank() || senha.isBlank()) {
 
             return erro(ra, "Preencha todos os campos obrigatórios.",
                     "/register/paciente");
         }
 
-        if (cpf.length() != 11
-                || !cpf.chars().allMatch(Character::isDigit)) {
+        // Aceita máscara (999.999.999-99, (31) 99999-9999): guarda só os números.
+        String cpfNumeros = cpf.replaceAll("\\D", "");
+        String telefoneNumeros = telefone.replaceAll("\\D", "");
 
+        if (cpfNumeros.length() != 11) {
             return erro(ra, "O CPF deve possuir 11 números.",
                     "/register/paciente");
         }
 
-        Map<String, String> extras = new HashMap<>();
-        extras.put("cpf", cpf);
-        extras.put("dataNascimento", dataNascimento);
-        extras.put("endereco", endereco);
+        if (telefoneNumeros.length() < 10 || telefoneNumeros.length() > 11) {
+            return erro(ra, "O telefone deve possuir 10 ou 11 números (com DDD).",
+                    "/register/paciente");
+        }
 
-        return criarConta(
-                nome, email, telefone, senha,
-                extras, ra, "/register/paciente");
+        String emailNormalizado = email.trim().toLowerCase();
+
+        if (!emailNormalizado.matches(EMAIL_REGEX)) {
+            return erro(ra, "Informe um e-mail válido.", "/register/paciente");
+        }
+
+        if (senha.length() < 8) {
+            return erro(ra, "A senha deve possuir pelo menos 8 caracteres.",
+                    "/register/paciente");
+        }
+
+        LocalDate nascimento;
+
+        try {
+            nascimento = LocalDate.parse(dataNascimento);
+        } catch (DateTimeParseException e) {
+            return erro(ra, "Informe uma data de nascimento válida.",
+                    "/register/paciente");
+        }
+
+        if (!nascimento.isBefore(LocalDate.now())) {
+            return erro(ra, "A data de nascimento deve estar no passado.",
+                    "/register/paciente");
+        }
+
+        try {
+            cadastroService.cadastrarPaciente(
+                    nome, cpfNumeros, nascimento, telefoneNumeros,
+                    endereco, emailNormalizado, senha);
+
+        } catch (IllegalArgumentException e) {
+            return erro(ra, e.getMessage(), "/register/paciente");
+        }
+
+        ra.addFlashAttribute(
+                "registerSuccess",
+                "Cadastro realizado com sucesso! Agora você pode fazer login.");
+
+        return "redirect:/login";
     }
 
     // ---------- CADASTRO DE DOUTOR ----------
@@ -175,70 +200,7 @@ public class SecureLoginController {
         return "redirect:/login";
     }
 
-    // ---------- CADASTRO DE CONTA NO BANCO ----------
-
-    private String criarConta(
-            String nome,
-            String email,
-            String telefone,
-            String senha,
-            Map<String, String> extras,
-            RedirectAttributes ra,
-            String paginaErro) {
-
-        String e = email.trim().toLowerCase();
-
-        if (nome.isBlank() || e.isBlank()
-                || telefone.isBlank() || senha.isBlank()) {
-
-            return erro(ra, "Preencha todos os campos obrigatórios.",
-                    paginaErro);
-        }
-
-        if (!e.matches(EMAIL_REGEX)) {
-            return erro(ra, "Informe um e-mail válido.", paginaErro);
-        }
-
-        if (senha.length() < 8) {
-            return erro(ra, "A senha deve possuir pelo menos 8 caracteres.",
-                    paginaErro);
-        }
-
-        if (usuarioRepository.existsByEmail(e)) {
-            return erro(ra, "Já existe uma conta cadastrada com este e-mail.",
-                    paginaErro);
-        }
-
-        Usuario usuario = new Usuario(
-                e,
-                passwordEncoder.encode(senha));
-
-        usuarioRepository.save(usuario);
-
-        Map<String, String> dados = dadosVazios(e);
-        dados.put("nome", valor(nome));
-        dados.put("telefone", valor(telefone));
-
-        extras.forEach((chave, v) -> dados.put(chave, valor(v)));
-
-        dadosUsuarios.put(e, dados);
-
-        ra.addFlashAttribute(
-                "registerSuccess",
-                "Cadastro realizado com sucesso! Agora você pode fazer login.");
-
-        return "redirect:/login";
-    }
-
     // ---------- PERFIS ----------
-
-    @GetMapping("/perfil/paciente")
-    public String perfilPaciente(Model model) {
-
-        model.addAttribute("paginaAtual", "perfil");
-
-        return "perfil-paciente";
-    }
 
     @GetMapping("/perfil/doutor")
     public String perfilDoutor(
@@ -260,29 +222,6 @@ public class SecureLoginController {
 
     // ---------- AUXILIARES ----------
 
-    private Map<String, String> dadosDe(String email) {
-
-        Map<String, String> dados = dadosUsuarios.get(email);
-
-        return dados != null ? dados : dadosVazios(email);
-    }
-
-    private Map<String, String> dadosVazios(String email) {
-
-        Map<String, String> vazio = new HashMap<>();
-
-        for (String chave : new String[]{
-                "nome", "cpf", "dataNascimento", "telefone",
-                "endereco", "especialidade", "registroProfissional"
-        }) {
-            vazio.put(chave, "—");
-        }
-
-        vazio.put("email", email);
-
-        return vazio;
-    }
-
     private String erro(
             RedirectAttributes ra,
             String mensagem,
@@ -291,11 +230,6 @@ public class SecureLoginController {
         ra.addFlashAttribute("registerError", mensagem);
 
         return "redirect:" + pagina;
-    }
-
-    private String valor(String s) {
-
-        return (s == null || s.isBlank()) ? "—" : s.trim();
     }
 
     // ---------- CONSULTAS E INTERNAÇÕES ----------
