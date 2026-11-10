@@ -10,11 +10,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.example.MedTech.dto.ConsultaRequest;
-import com.example.MedTech.enums.StatusAtendimento;
+import com.example.MedTech.enums.StatusConsulta;
 import com.example.MedTech.enums.Especialidade;
 import com.example.MedTech.enums.PrioridadeAtendimento;
 import com.example.MedTech.enums.TipoConsulta;
@@ -33,6 +34,7 @@ import com.example.MedTech.service.ConsultaService;
 import jakarta.persistence.EntityManager;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -47,6 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "logging.level.org.springframework.security=WARN"
 })
 @Transactional
+@WithMockUser(roles = "DOUTOR")
 class ConsultaApiTests {
 
     @Autowired
@@ -95,7 +98,7 @@ class ConsultaApiTests {
                 .andExpect(jsonPath("$.profissionalId").value(profissional.getId()))
                 .andExpect(jsonPath("$.data").value("2027-03-10"))
                 .andExpect(jsonPath("$.horario").value("14:00:00"))
-                .andExpect(jsonPath("$.status").value("AGENDADO"))
+                .andExpect(jsonPath("$.status").value("AGENDADA"))
                 .andExpect(jsonPath("$.tipo").value("ROTINA"))
                 .andExpect(jsonPath("$.paciente").doesNotExist())
                 .andExpect(jsonPath("$.profissional").doesNotExist());
@@ -172,7 +175,7 @@ class ConsultaApiTests {
     void cancelarPreservaHistoricoELiberaHorario() throws Exception {
         Long id = consultaService.agendar(requisicao(TipoConsulta.ROTINA, horario)).id();
         mvc.perform(delete("/consultas/{id}", id)).andExpect(status().isNoContent());
-        assertEquals(StatusAtendimento.CANCELADO,
+        assertEquals(StatusConsulta.CANCELADA,
                 consultaRepository.findById(id).orElseThrow().getStatus());
         consultaService.agendar(requisicao(TipoConsulta.ROTINA, horario));
 
@@ -187,12 +190,12 @@ class ConsultaApiTests {
         Long id = consultaService.agendar(requisicao(TipoConsulta.ROTINA, horario)).id();
         mvc.perform(post("/consultas/{id}/iniciar", id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("EM_ANDAMENTO"));
+                .andExpect(jsonPath("$.status").value("EM_ATENDIMENTO"));
         mvc.perform(post("/consultas/{id}/concluir", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"observacoes\":\"Paciente orientado.\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("CONCLUIDO"))
+                .andExpect(jsonPath("$.status").value("CONCLUIDA"))
                 .andExpect(jsonPath("$.observacoesMedicas").value("Paciente orientado."));
         mvc.perform(delete("/consultas/{id}", id)).andExpect(status().isConflict());
         mvc.perform(put("/consultas/{id}", id).contentType(MediaType.APPLICATION_JSON)
@@ -273,7 +276,7 @@ class ConsultaApiTests {
 
     @Test
     void paginaHtmlContinuaExigindoLogin() throws Exception {
-        mvc.perform(get("/consultas/pagina"))
+        mvc.perform(get("/consultas/pagina").with(anonymous()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
     }
@@ -283,11 +286,11 @@ class ConsultaApiTests {
         Long id = consultaService.agendar(requisicao(TipoConsulta.ROTINA, horario)).id();
         mvc.perform(post("/consultas/{id}/confirmar", id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("CONFIRMADO"));
+                .andExpect(jsonPath("$.status").value("CONFIRMADA"));
         mvc.perform(post("/consultas/{id}/confirmar", id)).andExpect(status().isConflict());
         mvc.perform(post("/consultas/{id}/iniciar", id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("EM_ANDAMENTO"));
+                .andExpect(jsonPath("$.status").value("EM_ATENDIMENTO"));
         mvc.perform(post("/consultas/{id}/nao-compareceu", id)).andExpect(status().isConflict());
     }
 
@@ -385,19 +388,86 @@ class ConsultaApiTests {
     @Test
     void identificarEmergenciasAguardandoIniciadasEConcluidas() throws Exception {
         Long id = consultaService.agendar(requisicao(TipoConsulta.EMERGENCIA, horario)).id();
-        mvc.perform(get("/consultas").param("status", "AGENDADO"))
+        mvc.perform(get("/consultas").param("status", "AGENDADA"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].prioridade").value("ALTA"));
         consultaService.iniciar(id);
-        mvc.perform(get("/consultas").param("status", "AGENDADO"))
+        mvc.perform(get("/consultas").param("status", "AGENDADA"))
                 .andExpect(jsonPath("$.length()").value(0));
-        mvc.perform(get("/consultas").param("status", "EM_ANDAMENTO"))
+        mvc.perform(get("/consultas").param("status", "EM_ATENDIMENTO"))
                 .andExpect(jsonPath("$[0].id").value(id));
         consultaService.concluir(id, "Paciente avaliado.");
-        mvc.perform(get("/consultas").param("status", "CONCLUIDO"))
+        mvc.perform(get("/consultas").param("status", "CONCLUIDA"))
                 .andExpect(jsonPath("$[0].id").value(id));
         mvc.perform(get("/consultas").param("status", "QUALQUER"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void clinicoGeralEncaminhaParaEspecialistaDuranteOuAposOAtendimento() throws Exception {
+        Long id = consultaService.agendar(requisicao(TipoConsulta.ROTINA, horario)).id();
+        String corpoEncaminhamento = "{\"especialidade\":\"CARDIOLOGIA\"}";
+        // Ainda não iniciada: não pode encaminhar.
+        mvc.perform(post("/consultas/{id}/encaminhar", id).contentType(MediaType.APPLICATION_JSON)
+                .content(corpoEncaminhamento))
+                .andExpect(status().isConflict());
+        consultaService.iniciar(id);
+        mvc.perform(post("/consultas/{id}/encaminhar", id).contentType(MediaType.APPLICATION_JSON)
+                .content(corpoEncaminhamento))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.especialidadeEncaminhada").value("CARDIOLOGIA"));
+        mvc.perform(post("/consultas/{id}/encaminhar", id).contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void somenteConsultaDeRotinaGeraEncaminhamento() throws Exception {
+        Long id = consultaService.agendar(requisicao(TipoConsulta.ESPECIALIZADA, horario)).id();
+        consultaService.iniciar(id);
+        mvc.perform(post("/consultas/{id}/encaminhar", id).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"especialidade\":\"ORTOPEDIA\"}"))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void filaDeEmergenciaListaPrioridadeMaisAltaPrimeiro() throws Exception {
+        consultaService.agendar(new ConsultaRequest(paciente.getId(), profissional.getId(), data,
+                LocalTime.of(8, 0), "Emergência", null, TipoConsulta.EMERGENCIA, null,
+                PrioridadeAtendimento.BAIXA));
+        consultaService.agendar(new ConsultaRequest(paciente.getId(), profissional.getId(), data,
+                LocalTime.of(9, 0), "Emergência", null, TipoConsulta.EMERGENCIA, null,
+                PrioridadeAtendimento.CRITICA));
+        consultaService.agendar(requisicao(TipoConsulta.ROTINA, LocalTime.of(10, 0)));
+        mvc.perform(get("/consultas").param("tipo", "EMERGENCIA").param("status", "AGENDADA"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].prioridade").value("CRITICA"))
+                .andExpect(jsonPath("$[1].prioridade").value("BAIXA"));
+    }
+
+    @Test
+    void profissionaisExpoemCategoriaEEspecialidade() throws Exception {
+        mvc.perform(get("/profissionais/{id}", profissional.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tipo").value("CLINICO"));
+        mvc.perform(get("/profissionais/{id}", especialista.getId()))
+                .andExpect(jsonPath("$.tipo").value("ESPECIALISTA"))
+                .andExpect(jsonPath("$.especialidade").value("CARDIOLOGIA"));
+        mvc.perform(get("/profissionais/especialidade/CARDIOLOGIA"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(especialista.getId()));
+        mvc.perform(get("/profissionais/{id}/procedimentos", profissional.getId()))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void profissionalComConsultaNaoPodeSerExcluido() throws Exception {
+        consultaService.agendar(requisicao(TipoConsulta.ROTINA, horario));
+        mvc.perform(delete("/profissionais/{id}", profissional.getId()))
+                .andExpect(status().isConflict());
+        mvc.perform(delete("/profissionais/999999")).andExpect(status().isNotFound());
     }
 
     private ConsultaRequest requisicao(TipoConsulta tipo, LocalTime hora) {
