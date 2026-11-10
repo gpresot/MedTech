@@ -143,18 +143,13 @@ function formatarCpf(cpf) {
 }
 
 const ROTULOS = {
-    // Consulta
-    AGENDADA: "Agendada",
-    CONFIRMADA: "Confirmada",
-    EM_ATENDIMENTO: "Em atendimento",
-    CONCLUIDA: "Concluída",
-    CANCELADA: "Cancelada",
-    NAO_COMPARECEU: "Não compareceu",
-    // Procedimento cirúrgico
+    // Status de atendimento (consulta, emergência e procedimento cirúrgico)
     AGENDADO: "Agendado",
+    CONFIRMADO: "Confirmado",
     EM_ANDAMENTO: "Em andamento",
     CONCLUIDO: "Concluído",
     CANCELADO: "Cancelado",
+    NAO_COMPARECEU: "Não compareceu",
     // Tipo de cirurgia
     ELETIVA: "Eletiva",
     URGENCIA: "Urgência",
