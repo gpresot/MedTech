@@ -47,7 +47,7 @@ src/main/java/com/example/MedTech
 ├── config        # Segurança e usuários
 ├── controller    # APIs REST e controllers das páginas
 ├── dto           # Objetos de requisição e resposta
-├── enums         # Especialidade, TipoQuarto, TipoCirurgia, StatusQuarto, StatusProcedimento, TipoUsuario
+├── enums         # Especialidade, TipoQuarto, TipoCirurgia, StatusQuarto, StatusAtendimento
 ├── exception     # Exceções e tratamento global (404, 409, 400)
 ├── factory       # ProfissionalFactory
 ├── model         # Entidades JPA
