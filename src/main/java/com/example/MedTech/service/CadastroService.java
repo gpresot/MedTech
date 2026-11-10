@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.MedTech.enums.Especialidade;
-import com.example.MedTech.enums.TipoUsuario;
 import com.example.MedTech.model.MedicoEspecialista;
 import com.example.MedTech.model.Usuario;
 import com.example.MedTech.repository.ProfissionalRepository;
@@ -68,8 +67,7 @@ public class CadastroService {
         // Cria a conta de acesso
         Usuario usuario = new Usuario(
                 emailNormalizado,
-                passwordEncoder.encode(senha),
-                TipoUsuario.DOUTOR);
+                passwordEncoder.encode(senha));
 
         // Salva os dois registros no banco
         profissionalRepository.save(medico);

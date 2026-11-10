@@ -3,7 +3,7 @@ package com.example.MedTech.dto;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import com.example.MedTech.enums.StatusConsulta;
+import com.example.MedTech.enums.StatusAtendimento;
 import com.example.MedTech.enums.TipoConsulta;
 import com.example.MedTech.enums.Especialidade;
 import com.example.MedTech.enums.PrioridadeAtendimento;
@@ -21,7 +21,7 @@ public record ConsultaResponse(
         LocalTime horario,
         String motivo,
         String observacoesMedicas,
-        StatusConsulta status,
+        StatusAtendimento status,
         TipoConsulta tipo,
         Especialidade especialidade,
         PrioridadeAtendimento prioridade) {

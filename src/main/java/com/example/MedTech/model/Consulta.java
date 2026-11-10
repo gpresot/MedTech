@@ -3,7 +3,7 @@ package com.example.MedTech.model;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import com.example.MedTech.enums.StatusConsulta;
+import com.example.MedTech.enums.StatusAtendimento;
 import com.example.MedTech.enums.TipoConsulta;
 import com.example.MedTech.exception.RegraNegocioException;
 
@@ -44,7 +44,7 @@ public class Consulta extends Atendimento {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private StatusConsulta status = StatusConsulta.AGENDADA;
+    private StatusAtendimento status = StatusAtendimento.AGENDADO;
 
     public Consulta() {
     }
@@ -72,35 +72,35 @@ public class Consulta extends Atendimento {
     public void iniciar() {
         verificarAguardando();
         validarAtendimento();
-        status = StatusConsulta.EM_ATENDIMENTO;
+        status = StatusAtendimento.EM_ANDAMENTO;
     }
 
     public void confirmar() {
         verificarAgendada();
-        status = StatusConsulta.CONFIRMADA;
+        status = StatusAtendimento.CONFIRMADO;
     }
 
     public void registrarNaoComparecimento() {
         verificarAguardando();
-        status = StatusConsulta.NAO_COMPARECEU;
+        status = StatusAtendimento.NAO_COMPARECEU;
     }
 
     public void cancelar() {
-        if (status == StatusConsulta.CONCLUIDA || status == StatusConsulta.CANCELADA
-                || status == StatusConsulta.NAO_COMPARECEU) {
+        if (status == StatusAtendimento.CONCLUIDO || status == StatusAtendimento.CANCELADO
+                || status == StatusAtendimento.NAO_COMPARECEU) {
             throw new RegraNegocioException(
                     "Não é possível cancelar uma consulta encerrada.");
         }
-        status = StatusConsulta.CANCELADA;
+        status = StatusAtendimento.CANCELADO;
     }
 
     public void concluir(String observacoes) {
-        if (status != StatusConsulta.EM_ATENDIMENTO) {
+        if (status != StatusAtendimento.EM_ANDAMENTO) {
             throw new RegraNegocioException(
                     "Apenas consultas em atendimento podem ser concluídas.");
         }
         observacoesMedicas = observacoes;
-        status = StatusConsulta.CONCLUIDA;
+        status = StatusAtendimento.CONCLUIDO;
     }
 
     @Override
@@ -112,13 +112,13 @@ public class Consulta extends Atendimento {
     }
 
     private void verificarAguardando() {
-        if (status != StatusConsulta.AGENDADA && status != StatusConsulta.CONFIRMADA) {
+        if (status != StatusAtendimento.AGENDADO && status != StatusAtendimento.CONFIRMADO) {
             throw new RegraNegocioException("A consulta precisa estar aguardando atendimento.");
         }
     }
 
     public void verificarAgendada() {
-        if (status != StatusConsulta.AGENDADA) {
+        if (status != StatusAtendimento.AGENDADO) {
             throw new RegraNegocioException("A consulta precisa estar agendada para esta operação.");
         }
     }
@@ -169,7 +169,7 @@ public class Consulta extends Atendimento {
         this.observacoesMedicas = observacoesMedicas;
     }
 
-    public StatusConsulta getStatus() {
+    public StatusAtendimento getStatus() {
         return status;
     }
 }

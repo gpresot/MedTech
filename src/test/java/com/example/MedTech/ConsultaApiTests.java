@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.example.MedTech.dto.ConsultaRequest;
-import com.example.MedTech.enums.StatusConsulta;
+import com.example.MedTech.enums.StatusAtendimento;
 import com.example.MedTech.enums.Especialidade;
 import com.example.MedTech.enums.PrioridadeAtendimento;
 import com.example.MedTech.enums.TipoConsulta;
@@ -95,7 +95,7 @@ class ConsultaApiTests {
                 .andExpect(jsonPath("$.profissionalId").value(profissional.getId()))
                 .andExpect(jsonPath("$.data").value("2027-03-10"))
                 .andExpect(jsonPath("$.horario").value("14:00:00"))
-                .andExpect(jsonPath("$.status").value("AGENDADA"))
+                .andExpect(jsonPath("$.status").value("AGENDADO"))
                 .andExpect(jsonPath("$.tipo").value("ROTINA"))
                 .andExpect(jsonPath("$.paciente").doesNotExist())
                 .andExpect(jsonPath("$.profissional").doesNotExist());
@@ -172,7 +172,7 @@ class ConsultaApiTests {
     void cancelarPreservaHistoricoELiberaHorario() throws Exception {
         Long id = consultaService.agendar(requisicao(TipoConsulta.ROTINA, horario)).id();
         mvc.perform(delete("/consultas/{id}", id)).andExpect(status().isNoContent());
-        assertEquals(StatusConsulta.CANCELADA,
+        assertEquals(StatusAtendimento.CANCELADO,
                 consultaRepository.findById(id).orElseThrow().getStatus());
         consultaService.agendar(requisicao(TipoConsulta.ROTINA, horario));
 
@@ -187,12 +187,12 @@ class ConsultaApiTests {
         Long id = consultaService.agendar(requisicao(TipoConsulta.ROTINA, horario)).id();
         mvc.perform(post("/consultas/{id}/iniciar", id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("EM_ATENDIMENTO"));
+                .andExpect(jsonPath("$.status").value("EM_ANDAMENTO"));
         mvc.perform(post("/consultas/{id}/concluir", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"observacoes\":\"Paciente orientado.\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("CONCLUIDA"))
+                .andExpect(jsonPath("$.status").value("CONCLUIDO"))
                 .andExpect(jsonPath("$.observacoesMedicas").value("Paciente orientado."));
         mvc.perform(delete("/consultas/{id}", id)).andExpect(status().isConflict());
         mvc.perform(put("/consultas/{id}", id).contentType(MediaType.APPLICATION_JSON)
@@ -283,11 +283,11 @@ class ConsultaApiTests {
         Long id = consultaService.agendar(requisicao(TipoConsulta.ROTINA, horario)).id();
         mvc.perform(post("/consultas/{id}/confirmar", id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("CONFIRMADA"));
+                .andExpect(jsonPath("$.status").value("CONFIRMADO"));
         mvc.perform(post("/consultas/{id}/confirmar", id)).andExpect(status().isConflict());
         mvc.perform(post("/consultas/{id}/iniciar", id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("EM_ATENDIMENTO"));
+                .andExpect(jsonPath("$.status").value("EM_ANDAMENTO"));
         mvc.perform(post("/consultas/{id}/nao-compareceu", id)).andExpect(status().isConflict());
     }
 
@@ -385,16 +385,16 @@ class ConsultaApiTests {
     @Test
     void identificarEmergenciasAguardandoIniciadasEConcluidas() throws Exception {
         Long id = consultaService.agendar(requisicao(TipoConsulta.EMERGENCIA, horario)).id();
-        mvc.perform(get("/consultas").param("status", "AGENDADA"))
+        mvc.perform(get("/consultas").param("status", "AGENDADO"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].prioridade").value("ALTA"));
         consultaService.iniciar(id);
-        mvc.perform(get("/consultas").param("status", "AGENDADA"))
+        mvc.perform(get("/consultas").param("status", "AGENDADO"))
                 .andExpect(jsonPath("$.length()").value(0));
-        mvc.perform(get("/consultas").param("status", "EM_ATENDIMENTO"))
+        mvc.perform(get("/consultas").param("status", "EM_ANDAMENTO"))
                 .andExpect(jsonPath("$[0].id").value(id));
         consultaService.concluir(id, "Paciente avaliado.");
-        mvc.perform(get("/consultas").param("status", "CONCLUIDA"))
+        mvc.perform(get("/consultas").param("status", "CONCLUIDO"))
                 .andExpect(jsonPath("$[0].id").value(id));
         mvc.perform(get("/consultas").param("status", "QUALQUER"))
                 .andExpect(status().isBadRequest());

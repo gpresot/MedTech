@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.example.MedTech.enums.StatusProcedimento;
+import com.example.MedTech.enums.StatusAtendimento;
 import com.example.MedTech.model.ProcedimentoCirurgico;
 
 @Repository
@@ -21,14 +21,14 @@ public interface ProcedimentoCirurgicoRepository
     List<ProcedimentoCirurgico> findByInternacaoPacienteIdOrderByDataHoraDesc(Long pacienteId);
 
     boolean existsByInternacaoIdAndStatusIn(Long internacaoId,
-            Collection<StatusProcedimento> status);
+            Collection<StatusAtendimento> status);
 
     // Procedimentos ativos do cirurgião que colidem com a janela (inicio, fim).
     @Query("SELECT COUNT(p) FROM ProcedimentoCirurgico p "
             + "WHERE p.cirurgiao.id = :cirurgiaoId AND p.status IN :status "
             + "AND p.dataHora > :inicio AND p.dataHora < :fim")
     long contarConflitosDoCirurgiao(@Param("cirurgiaoId") Long cirurgiaoId,
-            @Param("status") Collection<StatusProcedimento> status,
+            @Param("status") Collection<StatusAtendimento> status,
             @Param("inicio") LocalDateTime inicio,
             @Param("fim") LocalDateTime fim);
 
@@ -37,7 +37,7 @@ public interface ProcedimentoCirurgicoRepository
             + "WHERE p.internacao.paciente.id = :pacienteId AND p.status IN :status "
             + "AND p.dataHora > :inicio AND p.dataHora < :fim")
     long contarConflitosDoPaciente(@Param("pacienteId") Long pacienteId,
-            @Param("status") Collection<StatusProcedimento> status,
+            @Param("status") Collection<StatusAtendimento> status,
             @Param("inicio") LocalDateTime inicio,
             @Param("fim") LocalDateTime fim);
 }

@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.MedTech.dto.ProcedimentoRequest;
 import com.example.MedTech.dto.ProcedimentoResponse;
-import com.example.MedTech.enums.StatusProcedimento;
+import com.example.MedTech.enums.StatusAtendimento;
 import com.example.MedTech.enums.TipoCirurgia;
 import com.example.MedTech.exception.RecursoNaoEncontradoException;
 import com.example.MedTech.exception.RegraNegocioException;
@@ -37,8 +37,8 @@ import com.example.MedTech.repository.ProfissionalRepository;
 public class ProcedimentoCirurgicoService {
 
     static final Duration DURACAO_PADRAO = Duration.ofHours(2);
-    private static final List<StatusProcedimento> ATIVOS =
-            List.of(StatusProcedimento.AGENDADO, StatusProcedimento.EM_ANDAMENTO);
+    private static final List<StatusAtendimento> ATIVOS =
+            List.of(StatusAtendimento.AGENDADO, StatusAtendimento.EM_ANDAMENTO);
 
     private final ProcedimentoCirurgicoRepository procedimentoRepository;
     private final InternacaoRepository internacaoRepository;

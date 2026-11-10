@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.example.MedTech.enums.TipoUsuario;
 import com.example.MedTech.model.Usuario;
 import com.example.MedTech.model.Profissional;
 import com.example.MedTech.repository.UsuarioRepository;
@@ -110,7 +109,7 @@ public class SecureLoginController {
         extras.put("endereco", endereco);
 
         return criarConta(
-                "PACIENTE", nome, email, telefone, senha,
+                nome, email, telefone, senha,
                 extras, ra, "/register/paciente");
     }
 
@@ -179,7 +178,6 @@ public class SecureLoginController {
     // ---------- CADASTRO DE CONTA NO BANCO ----------
 
     private String criarConta(
-            String role,
             String nome,
             String email,
             String telefone,
@@ -213,8 +211,7 @@ public class SecureLoginController {
 
         Usuario usuario = new Usuario(
                 e,
-                passwordEncoder.encode(senha),
-                TipoUsuario.valueOf(role));
+                passwordEncoder.encode(senha));
 
         usuarioRepository.save(usuario);
 
