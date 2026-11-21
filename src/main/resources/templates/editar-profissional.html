@@ -109,6 +109,20 @@
     </main>
 
     <script>
+        // Erros de validação chegam como JSON ({"cpf": "..."}); mostra só as mensagens.
+        async function lerErro(resposta) {
+            const texto = await resposta.text();
+            try {
+                const json = JSON.parse(texto);
+                if (json && typeof json === "object") {
+                    return Object.values(json).join(" ");
+                }
+            } catch (e) {
+                // não era JSON: usa o texto como veio
+            }
+            return texto;
+        }
+
         const formulario = document.getElementById("formEditarProfissional");
         const mensagem = document.getElementById("mensagem");
 
@@ -120,9 +134,9 @@
 
             const dados = {
                 nome: document.getElementById("nome").value.trim(),
-                cpf: document.getElementById("cpf").value.trim(),
+                cpf: document.getElementById("cpf").value.replace(/\D/g, ""),
                 email: document.getElementById("email").value.trim(),
-                telefone: document.getElementById("telefone").value.trim(),
+                telefone: document.getElementById("telefone").value.replace(/\D/g, ""),
                 crm: document.getElementById("crm").value.trim()
             };
 
@@ -145,7 +159,7 @@
                 });
 
                 if (!resposta.ok) {
-                    const erro = await resposta.text();
+                    const erro = await lerErro(resposta);
                     throw new Error(erro || "Não foi possível atualizar.");
                 }
 

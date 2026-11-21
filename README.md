@@ -28,6 +28,7 @@ O MedTech gerencia o fluxo de um hospital: cadastro de pacientes e profissionais
    | Variável        | Descrição                              |
    | --------------- | -------------------------------------- |
    | `DB_PASSWORD`   | Senha do banco PostgreSQL              |
+   | `CODIGO_CONVITE_DOUTOR` | (opcional) código exigido no cadastro de doutor; vazio = cadastro livre |
    | `MAIL_USERNAME` | Usuário do e-mail (SMTP)               |
    | `MAIL_PASSWORD` | Senha do e-mail (SMTP)                 |
    | `APP_BASE_URL`  | Opcional. Padrão: `http://localhost:8080` |

@@ -42,6 +42,11 @@ public class ConsultaController {
         return consultaService.listarPorPaciente(pacienteId);
     }
 
+    @GetMapping("/profissional/{profissionalId}")
+    public List<ConsultaResponse> listarPorProfissional(@PathVariable Long profissionalId) {
+        return consultaService.listarPorProfissional(profissionalId);
+    }
+
     @PostMapping
     public ResponseEntity<ConsultaResponse> agendar(@Valid @RequestBody ConsultaRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(consultaService.agendar(req));

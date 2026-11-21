@@ -275,6 +275,26 @@ class ConsultaApiTests {
     }
 
     @Test
+    void naoPermiteAgendarEmDataPassada() throws Exception {
+        String passado = corpo("ROTINA", "14:00:00")
+                .replace("2027-03-10", LocalDate.now().minusDays(1).toString());
+        mvc.perform(post("/consultas").contentType(MediaType.APPLICATION_JSON).content(passado))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void listaConsultasDoProfissional() throws Exception {
+        consultaService.agendar(requisicao(TipoConsulta.ROTINA, horario));
+        mvc.perform(get("/consultas/profissional/{id}", profissional.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+        mvc.perform(get("/consultas/profissional/{id}", especialista.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+        mvc.perform(get("/consultas/profissional/999999")).andExpect(status().isNotFound());
+    }
+
+    @Test
     void paginaHtmlContinuaExigindoLogin() throws Exception {
         mvc.perform(get("/consultas/pagina").with(anonymous()))
                 .andExpect(status().is3xxRedirection())

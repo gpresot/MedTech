@@ -22,6 +22,8 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
 
     List<Consulta> findByPacienteIdOrderByDataDescHorarioDesc(Long pacienteId);
 
+    List<Consulta> findByProfissionalIdOrderByDataDescHorarioDesc(Long profissionalId);
+
     List<Consulta> findByStatus(StatusConsulta status);
 
     boolean existsByProfissionalId(Long profissionalId);

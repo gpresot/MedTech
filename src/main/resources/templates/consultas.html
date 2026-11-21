@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
@@ -8,98 +8,380 @@
     <title>Consultas - MedTech</title>
 
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
-    <link rel="stylesheet" th:href="@{/css/consultas.css}">
+    <link rel="stylesheet" th:href="@{/css/gestao.css}">
     <link rel="icon" type="image/png" th:href="@{/images/icon.png}">
 </head>
 
 <body>
 
-<div th:replace="~{fragments/navbar :: navbar}"></div>
-    <main>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
+    <main class="container">
+
+        <header class="cabecalho">
+            <h1>Consultas</h1>
+            <p>Agendamento e acompanhamento das consultas</p>
+        </header>
+
+        <!-- AGENDAR -->
         <section class="caixa">
-            <h2>Agendar Consulta</h2>
+            <h2>Agendar consulta</h2>
 
-            <form>
-                <label>Paciente</label>
-                <input type="text" placeholder="Nome do paciente">
+            <form id="formConsulta" class="form-grid">
 
-                <label>Profissional</label>
-                <select>
-                    <option>Selecione um profissional</option>
-                    <option>Dr. Carlos Silva</option>
-                    <option>Dra. Ana Souza</option>
-                    <option>Dr. Rafael Lima</option>
-                </select>
-
-                <label>Especialidade</label>
-                <select>
-                    <option>Selecione a especialidade</option>
-                    <option>Clínico Geral</option>
-                    <option>Cardiologia</option>
-                    <option>Ortopedia</option>
-                </select>
-
-                <div class="linha">
-                    <div>
-                        <label>Data</label>
-                        <input type="date">
-                    </div>
-
-                    <div>
-                        <label>Horário</label>
-                        <input type="time">
-                    </div>
+                <div class="campo">
+                    <label for="pacienteId">Paciente</label>
+                    <select id="pacienteId" required></select>
                 </div>
 
-                <label>Motivo da consulta</label>
-                <input type="text" placeholder="Digite o motivo">
+                <div class="campo">
+                    <label for="tipo">Tipo de consulta</label>
+                    <select id="tipo" required>
+                        <option value="ROTINA">Rotina (clínico geral)</option>
+                        <option value="ESPECIALIZADA">Especializada</option>
+                        <option value="EMERGENCIA">Emergência</option>
+                    </select>
+                </div>
 
-                <label>Observações</label>
-                <textarea placeholder="Observações"></textarea>
+                <div class="campo oculto" id="campoEspecialidade">
+                    <label for="especialidade">Especialidade</label>
+                    <select id="especialidade"></select>
+                </div>
 
-                <button type="button">Agendar Consulta</button>
+                <div class="campo oculto" id="campoPrioridade">
+                    <label for="prioridade">Prioridade</label>
+                    <select id="prioridade">
+                        <option value="">Selecione a prioridade</option>
+                        <option value="BAIXA">Baixa</option>
+                        <option value="MODERADA">Moderada</option>
+                        <option value="ALTA">Alta</option>
+                        <option value="CRITICA">Crítica</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label for="profissionalId">Profissional</label>
+                    <select id="profissionalId" required></select>
+                </div>
+
+                <div class="campo">
+                    <label for="data">Data</label>
+                    <input type="date" id="data" required>
+                </div>
+
+                <div class="campo">
+                    <label for="horario">Horário</label>
+                    <input type="time" id="horario" required>
+                </div>
+
+                <div class="campo campo-largo">
+                    <label for="motivo">Motivo da consulta</label>
+                    <input type="text" id="motivo" placeholder="Digite o motivo" required>
+                </div>
+
+                <div class="campo campo-largo">
+                    <label for="observacoes">Observações</label>
+                    <textarea id="observacoes" placeholder="Observações (opcional)"></textarea>
+                </div>
+
+                <div class="campo campo-acoes">
+                    <button type="submit" class="botao">Agendar consulta</button>
+                </div>
             </form>
+
+            <p id="mensagemForm" class="mensagem"></p>
         </section>
 
+        <!-- AÇÃO (concluir) -->
+        <section class="caixa oculto" id="painelAcao"></section>
+
+        <!-- LISTA -->
         <section class="caixa">
-            <h2>Consultas Agendadas</h2>
 
-            <table>
-                <tr>
-                    <th>Paciente</th>
-                    <th>Profissional</th>
-                    <th>Especialidade</th>
-                    <th>Data</th>
-                    <th>Horário</th>
-                    <th>Status</th>
-                </tr>
+            <div class="topo-caixa">
+                <h2>Consultas</h2>
 
-                <tr>
-                    <td>João Silva</td>
-                    <td>Dr. Carlos Silva</td>
-                    <td>Cardiologia</td>
-                    <td>08/10/2026</td>
-                    <td>14:00</td>
-                    <td>Agendada</td>
-                </tr>
+                <label class="filtro">
+                    Situação
+                    <select id="filtroStatus">
+                        <option value="">Todas</option>
+                        <option value="AGENDADA">Agendadas</option>
+                        <option value="CONFIRMADA">Confirmadas</option>
+                        <option value="EM_ATENDIMENTO">Em atendimento</option>
+                        <option value="CONCLUIDA">Concluídas</option>
+                        <option value="CANCELADA">Canceladas</option>
+                        <option value="NAO_COMPARECEU">Não compareceu</option>
+                    </select>
+                </label>
+            </div>
 
-                <tr>
-                    <td>Maria Oliveira</td>
-                    <td>Dra. Ana Souza</td>
-                    <td>Clínico Geral</td>
-                    <td>10/10/2026</td>
-                    <td>09:30</td>
-                    <td>Agendada</td>
-                </tr>
-            </table>
+            <p id="mensagemLista" class="mensagem"></p>
+            <div id="listaConsultas"></div>
         </section>
 
     </main>
 
-    <footer>
-        <p>MedTech - Sistema Hospitalar</p>
-    </footer>
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+        const form = document.getElementById("formConsulta");
+        const msgForm = document.getElementById("mensagemForm");
+        const msgLista = document.getElementById("mensagemLista");
+        const campoTipo = document.getElementById("tipo");
+        const campoEspecialidade = document.getElementById("especialidade");
+        const campoProfissional = document.getElementById("profissionalId");
+        const filtroStatus = document.getElementById("filtroStatus");
+
+        const EM_ABERTO = ["AGENDADA", "CONFIRMADA", "EM_ATENDIMENTO"];
+
+        let profissionais = [];
+
+        document.getElementById("data").min = hoje();
+
+        // ---------- LISTAS DE SELEÇÃO ----------
+
+        function preencherSelect(select, itens, textoPadrao, textoVazio) {
+            if (!itens.length) {
+                select.replaceChildren(el("option", { value: "" }, textoVazio));
+                return;
+            }
+
+            select.replaceChildren(
+                el("option", { value: "" }, textoPadrao),
+                ...itens.map(i => el("option", { value: i.valor }, i.texto))
+            );
+        }
+
+        async function carregarOpcoes() {
+            try {
+                const [pacientes, lista] = await Promise.all([api("/pacientes"), api("/profissionais")]);
+                profissionais = lista;
+
+                preencherSelect(document.getElementById("pacienteId"),
+                    pacientes.map(p => ({ valor: p.id, texto: `${p.nome} — CPF ${formatarCpf(p.cpf)}` })),
+                    "Selecione o paciente", "Nenhum paciente cadastrado");
+
+                const especialidades = [...new Set(
+                    profissionais.filter(p => p.tipo === "ESPECIALISTA" && p.especialidade)
+                        .map(p => p.especialidade))].sort();
+
+                preencherSelect(campoEspecialidade,
+                    especialidades.map(e => ({ valor: e, texto: rotulo(e) })),
+                    "Selecione a especialidade", "Nenhum especialista cadastrado");
+
+                atualizarProfissionais();
+            } catch (erro) {
+                mostrarMensagem(msgForm, erro.message, "erro");
+            }
+        }
+
+        // Cada tipo de consulta aceita um tipo de profissional (regra do backend).
+        function profissionaisDoTipo() {
+            const tipo = campoTipo.value;
+
+            if (tipo === "ROTINA") {
+                return profissionais.filter(p => p.tipo === "CLINICO");
+            }
+            if (tipo === "ESPECIALIZADA") {
+                return profissionais.filter(p =>
+                    p.tipo === "ESPECIALISTA" && p.especialidade === campoEspecialidade.value);
+            }
+            return profissionais;
+        }
+
+        function atualizarProfissionais() {
+            const tipo = campoTipo.value;
+            const lista = profissionaisDoTipo();
+
+            const vazio = tipo === "ROTINA" ? "Nenhum clínico geral cadastrado"
+                : tipo === "ESPECIALIZADA" ? "Escolha a especialidade primeiro"
+                : "Nenhum profissional cadastrado";
+
+            preencherSelect(campoProfissional,
+                lista.map(p => ({ valor: p.id, texto: `${p.nome} (CRM ${p.crm})` })),
+                "Selecione o profissional", vazio);
+        }
+
+        function atualizarCamposDoTipo() {
+            const tipo = campoTipo.value;
+
+            document.getElementById("campoEspecialidade").classList.toggle("oculto", tipo !== "ESPECIALIZADA");
+            document.getElementById("campoPrioridade").classList.toggle("oculto", tipo !== "EMERGENCIA");
+
+            campoEspecialidade.required = tipo === "ESPECIALIZADA";
+            document.getElementById("prioridade").required = tipo === "EMERGENCIA";
+
+            atualizarProfissionais();
+        }
+
+        campoTipo.addEventListener("change", atualizarCamposDoTipo);
+        campoEspecialidade.addEventListener("change", atualizarProfissionais);
+
+        // ---------- AGENDAR ----------
+
+        form.addEventListener("submit", async (evento) => {
+            evento.preventDefault();
+
+            const tipo = campoTipo.value;
+            const observacoes = document.getElementById("observacoes").value.trim();
+
+            const dados = {
+                pacienteId: Number(document.getElementById("pacienteId").value),
+                profissionalId: Number(campoProfissional.value),
+                data: document.getElementById("data").value,
+                horario: document.getElementById("horario").value,
+                motivo: document.getElementById("motivo").value.trim(),
+                observacoesMedicas: observacoes || null,
+                tipo: tipo,
+                especialidade: tipo === "ESPECIALIZADA" ? campoEspecialidade.value : null,
+                prioridade: tipo === "EMERGENCIA" ? document.getElementById("prioridade").value : null
+            };
+
+            mostrarMensagem(msgForm, "Agendando...", "");
+
+            try {
+                await api("/consultas", { method: "POST", body: dados });
+
+                mostrarMensagem(msgForm, "Consulta agendada com sucesso!", "sucesso");
+
+                form.reset();
+                atualizarCamposDoTipo();
+                await carregarConsultas();
+
+            } catch (erro) {
+                mostrarMensagem(msgForm, erro.message, "erro");
+            }
+        });
+
+        // ---------- LISTA ----------
+
+        function tipoTexto(c) {
+            if (c.tipo === "ESPECIALIZADA") {
+                return `Especializada — ${rotulo(c.especialidade)}`;
+            }
+            if (c.tipo === "EMERGENCIA") {
+                return `Emergência — ${rotulo(c.prioridade)}`;
+            }
+            return c.especialidadeEncaminhada
+                ? `Rotina (encaminhado: ${rotulo(c.especialidadeEncaminhada)})`
+                : "Rotina";
+        }
+
+        function tipoSelo(status) {
+            if (status === "CONFIRMADA" || status === "CONCLUIDA") return "ok";
+            if (status === "EM_ATENDIMENTO") return "alerta";
+            if (status === "CANCELADA" || status === "NAO_COMPARECEU") return "erro";
+            return "";
+        }
+
+        async function carregarConsultas() {
+            try {
+                const status = filtroStatus.value;
+                const consultas = await api(status ? `/consultas?status=${status}` : "/consultas");
+
+                const chave = c => c.data + "T" + c.horario;
+                const abertas = consultas.filter(c => EM_ABERTO.includes(c.status))
+                    .sort((a, b) => chave(a).localeCompare(chave(b)));
+                const encerradas = consultas.filter(c => !EM_ABERTO.includes(c.status))
+                    .sort((a, b) => chave(b).localeCompare(chave(a)));
+
+                desenharLista(
+                    document.getElementById("listaConsultas"),
+                    "Nenhuma consulta encontrada.",
+                    ["Paciente", "Profissional", "Tipo", "Data", "Horário", "Motivo", "Situação", "Ações"],
+                    [...abertas, ...encerradas].map(c => [
+                        c.pacienteNome,
+                        c.profissionalNome,
+                        tipoTexto(c),
+                        formatarData(c.data),
+                        formatarHora(c.horario),
+                        c.motivo,
+                        selo(rotulo(c.status), tipoSelo(c.status)),
+                        acoes(c)
+                    ])
+                );
+            } catch (erro) {
+                mostrarMensagem(msgLista, erro.message, "erro");
+            }
+        }
+
+        filtroStatus.addEventListener("change", carregarConsultas);
+
+        function botao(texto, classe, funcao) {
+            return el("button", { type: "button", class: "botao " + classe, onclick: funcao }, texto);
+        }
+
+        function acoes(c) {
+            const lista = [];
+            const aguardando = c.status === "AGENDADA" || c.status === "CONFIRMADA";
+
+            if (c.status === "AGENDADA") {
+                lista.push(botao("Confirmar", "", () => executar(c, "confirmar", "Consulta confirmada!")));
+            }
+            if (aguardando) {
+                lista.push(botao("Iniciar", "", () => executar(c, "iniciar", "Atendimento iniciado!")));
+                lista.push(botao("Não compareceu", "botao-secundario",
+                    () => executar(c, "nao-compareceu", "Não comparecimento registrado.")));
+            }
+            if (c.status === "EM_ATENDIMENTO") {
+                lista.push(botao("Concluir", "", () => concluir(c)));
+            }
+            if (aguardando || c.status === "EM_ATENDIMENTO") {
+                lista.push(botao("Cancelar", "botao-perigo", () => cancelar(c)));
+            }
+
+            return lista.length ? lista : "—";
+        }
+
+        async function executar(c, acao, sucesso) {
+            mostrarMensagem(msgLista, "", "");
+
+            try {
+                await api(`/consultas/${c.id}/${acao}`, { method: "POST" });
+                mostrarMensagem(msgLista, sucesso, "sucesso");
+                await carregarConsultas();
+            } catch (erro) {
+                mostrarMensagem(msgLista, erro.message, "erro");
+            }
+        }
+
+        function concluir(c) {
+            abrirPainel({
+                titulo: `Concluir consulta de ${c.pacienteNome}`,
+                rotulo: "Observações médicas",
+                tipo: "textarea",
+                valor: c.observacoesMedicas || "",
+                confirmar: "Concluir consulta",
+                onConfirmar: async (texto) => {
+                    await api(`/consultas/${c.id}/concluir`, {
+                        method: "POST",
+                        body: { observacoes: texto }
+                    });
+                    mostrarMensagem(msgLista, "Consulta concluída!", "sucesso");
+                    await carregarConsultas();
+                }
+            });
+        }
+
+        async function cancelar(c) {
+            if (!confirm(`Cancelar a consulta de ${c.pacienteNome} em ${formatarData(c.data)}?`)) {
+                return;
+            }
+
+            mostrarMensagem(msgLista, "", "");
+
+            try {
+                await api(`/consultas/${c.id}`, { method: "DELETE" });
+                mostrarMensagem(msgLista, "Consulta cancelada.", "sucesso");
+                await carregarConsultas();
+            } catch (erro) {
+                mostrarMensagem(msgLista, erro.message, "erro");
+            }
+        }
+
+        atualizarCamposDoTipo();
+        carregarOpcoes();
+        carregarConsultas();
+    </script>
 
 </body>
 

@@ -45,10 +45,25 @@ public class CadastroService {
             String senha) {
 
         String emailNormalizado = email.trim().toLowerCase();
+        crm = crm.trim();
 
-        if (usuarioRepository.existsByEmail(emailNormalizado)) {
+        // O papel (DOUTOR/PACIENTE) é decidido pelo e-mail, então ele não pode
+        // existir nos dois cadastros ao mesmo tempo.
+        if (usuarioRepository.existsByEmail(emailNormalizado)
+                || profissionalRepository.existsByEmail(emailNormalizado)
+                || pacienteRepository.existsByEmail(emailNormalizado)) {
             throw new IllegalArgumentException(
                     "Já existe uma conta cadastrada com este e-mail.");
+        }
+
+        if (profissionalRepository.existsByCpf(cpf)) {
+            throw new IllegalArgumentException(
+                    "Já existe um profissional cadastrado com este CPF.");
+        }
+
+        if (profissionalRepository.existsByCrm(crm)) {
+            throw new IllegalArgumentException(
+                    "Já existe um profissional cadastrado com este registro (CRM).");
         }
 
         Especialidade especialidadeEnum;
@@ -64,7 +79,7 @@ public class CadastroService {
         // Cria o profissional
         MedicoEspecialista medico = new MedicoEspecialista();
 
-        medico.setNome(nome);
+        medico.setNome(nome.trim());
         medico.setCpf(cpf);
         medico.setEmail(emailNormalizado);
         medico.setTelefone(telefone);
@@ -98,7 +113,8 @@ public class CadastroService {
         String emailNormalizado = email.trim().toLowerCase();
 
         if (usuarioRepository.existsByEmail(emailNormalizado)
-                || pacienteRepository.existsByEmail(emailNormalizado)) {
+                || pacienteRepository.existsByEmail(emailNormalizado)
+                || profissionalRepository.existsByEmail(emailNormalizado)) {
             throw new IllegalArgumentException(
                     "Já existe uma conta cadastrada com este e-mail.");
         }

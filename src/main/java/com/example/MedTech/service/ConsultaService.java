@@ -1,5 +1,6 @@
 package com.example.MedTech.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -23,6 +24,7 @@ import com.example.MedTech.model.Paciente;
 import com.example.MedTech.model.Profissional;
 import com.example.MedTech.repository.ConsultaRepository;
 import com.example.MedTech.repository.PacienteRepository;
+import com.example.MedTech.repository.ProfissionalRepository;
 
 @Service
 @Transactional
@@ -30,11 +32,14 @@ public class ConsultaService {
 
     private final ConsultaRepository consultaRepository;
     private final PacienteRepository pacienteRepository;
+    private final ProfissionalRepository profissionalRepository;
 
     public ConsultaService(ConsultaRepository consultaRepository,
-            PacienteRepository pacienteRepository) {
+            PacienteRepository pacienteRepository,
+            ProfissionalRepository profissionalRepository) {
         this.consultaRepository = consultaRepository;
         this.pacienteRepository = pacienteRepository;
+        this.profissionalRepository = profissionalRepository;
     }
 
     @Transactional(readOnly = true)
@@ -72,6 +77,14 @@ public class ConsultaService {
     }
 
     @Transactional(readOnly = true)
+    public List<ConsultaResponse> listarPorProfissional(Long profissionalId) {
+        if (!profissionalRepository.existsById(profissionalId)) {
+            throw new RecursoNaoEncontradoException("Profissional não encontrado.");
+        }
+        return converter(consultaRepository.findByProfissionalIdOrderByDataDescHorarioDesc(profissionalId));
+    }
+
+    @Transactional(readOnly = true)
     public ConsultaResponse buscar(Long id) {
         Consulta consulta = consultaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Consulta não encontrada."));
@@ -81,6 +94,7 @@ public class ConsultaService {
     public ConsultaResponse agendar(ConsultaRequest req) {
         Paciente paciente = obterPaciente(req.pacienteId());
         Profissional profissional = obterProfissional(req.profissionalId());
+        verificarData(req);
         verificarHorario(req, null);
 
         Consulta consulta;
@@ -107,6 +121,7 @@ public class ConsultaService {
 
         Paciente paciente = obterPaciente(req.pacienteId());
         Profissional profissional = obterProfissional(req.profissionalId());
+        verificarData(req);
         verificarHorario(req, id);
         preencher(consulta, req, paciente, profissional);
         return ConsultaResponse.de(consulta);
@@ -166,6 +181,13 @@ public class ConsultaService {
     private Consulta obterParaAtualizar(Long id) {
         return consultaRepository.buscarParaAtualizar(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Consulta não encontrada."));
+    }
+
+    /** Não permite agendar (ou remarcar) para um dia que já passou. */
+    private void verificarData(ConsultaRequest req) {
+        if (req.data().isBefore(LocalDate.now())) {
+            throw new RegraNegocioException("Não é possível agendar uma consulta em uma data passada.");
+        }
     }
 
     private void verificarHorario(ConsultaRequest req, Long consultaId) {

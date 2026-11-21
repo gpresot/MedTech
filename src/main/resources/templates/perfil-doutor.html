@@ -33,6 +33,9 @@
             Perfil do Profissional
         </h1>
 
+        <div class="perfil-alerta perfil-alerta-sucesso" th:if="${perfilSucesso}" th:text="${perfilSucesso}"></div>
+        <div class="perfil-alerta perfil-alerta-erro" th:if="${perfilErro}" th:text="${perfilErro}"></div>
+
 
         <!-- IDENTIFICAÇÃO DO PROFISSIONAL -->
 
@@ -44,12 +47,12 @@
 
             <div class="perfil-nome">
 
-                <h2 th:text="${profissional.nome}">
+                <h2 th:text="${profissional.nome()}">
                     Nome do profissional
                 </h2>
 
-                <p th:text="${profissional.especialidade}">
-                    Especialidade
+                <p th:text="${cargo}">
+                    Cargo
                 </p>
 
             </div>
@@ -73,7 +76,7 @@
 
                     <span>Nome</span>
 
-                    <strong th:text="${profissional.nome}">
+                    <strong th:text="${profissional.nome()}">
                         Nome do profissional
                     </strong>
 
@@ -86,7 +89,7 @@
 
                     <span>Registro profissional</span>
 
-                    <strong th:text="${profissional.crm}">
+                    <strong th:text="${profissional.crm()}">
                         Registro profissional
                     </strong>
 
@@ -99,7 +102,7 @@
 
                     <span>Especialidade</span>
 
-                    <strong th:text="${profissional.especialidade}">
+                    <strong th:text="${cargo}">
                         Especialidade
                     </strong>
 
@@ -112,7 +115,7 @@
 
                     <span>Telefone</span>
 
-                    <strong th:text="${profissional.telefone}">
+                    <strong th:text="${profissional.telefone()}">
                         Telefone do profissional
                     </strong>
 
@@ -125,7 +128,7 @@
 
                     <span>E-mail</span>
 
-                    <strong th:text="${profissional.email}">
+                    <strong th:text="${profissional.email()}">
                         E-mail do profissional
                     </strong>
 
@@ -140,17 +143,87 @@
 
         <section class="perfil-acoes">
 
-            <button type="button" class="perfil-button perfil-button-primary">
+            <button type="button" id="btn-editar" class="perfil-button perfil-button-primary">
                 Editar perfil
             </button>
 
-            <button type="button" class="perfil-button">
+            <a href="#consultas" class="perfil-button">
                 Ver consultas
-            </button>
+            </a>
+
+            <a th:href="@{/consultas/pagina}" class="perfil-button">
+                Agendar consulta
+            </a>
+
+        </section>
+
+
+        <!-- EDITAR PERFIL -->
+
+        <section id="editar-contato" class="perfil-card"
+                 th:classappend="${perfilErro == null} ? 'oculto' : ''">
+
+            <h2>Editar perfil</h2>
+
+            <form th:action="@{/perfil/doutor}" method="post" class="perfil-form">
+
+                <label for="nome">Nome</label>
+                <input type="text" id="nome" name="nome"
+                       th:value="${profissional.nome()}" required>
+
+                <label for="telefone">Telefone</label>
+                <input type="tel" id="telefone" name="telefone"
+                       th:value="${profissional.telefone()}" required>
+
+                <p class="perfil-nota">
+                    E-mail (seu login), CPF, registro profissional e especialidade não podem ser alterados por aqui.
+                </p>
+
+                <div class="perfil-acoes">
+                    <button type="submit" class="perfil-button perfil-button-primary">
+                        Salvar alterações
+                    </button>
+
+                    <button type="button" id="btn-cancelar" class="perfil-button">
+                        Cancelar
+                    </button>
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- CONSULTAS -->
+
+        <section id="consultas" class="perfil-card">
+
+            <h2>Minhas consultas</h2>
+
+            <h3 class="perfil-subtitulo">Próximas e em andamento</h3>
+
+            <div th:replace="~{fragments/tabela-consultas :: tabela(${proximasConsultas}, 'paciente', 'Nenhuma consulta em aberto.')}"></div>
+
+            <h3 class="perfil-subtitulo">Encerradas</h3>
+
+            <div th:replace="~{fragments/tabela-consultas :: tabela(${consultasAnteriores}, 'paciente', 'Nenhuma consulta encerrada.')}"></div>
 
         </section>
 
     </main>
+
+    <script>
+        const cartaoEdicao = document.getElementById("editar-contato");
+
+        document.getElementById("btn-editar").addEventListener("click", () => {
+            cartaoEdicao.classList.remove("oculto");
+            cartaoEdicao.scrollIntoView({ behavior: "smooth" });
+        });
+
+        document.getElementById("btn-cancelar").addEventListener("click", () => {
+            cartaoEdicao.classList.add("oculto");
+        });
+    </script>
 
 </body>
 

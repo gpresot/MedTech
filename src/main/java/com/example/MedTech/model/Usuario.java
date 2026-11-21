@@ -4,7 +4,7 @@ package com.example.MedTech.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "usuarios")
+@Table(name = "medtech_usuarios")
 public class Usuario {
 
     @Id

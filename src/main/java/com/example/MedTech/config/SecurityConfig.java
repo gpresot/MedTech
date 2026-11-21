@@ -26,16 +26,9 @@ public class SecurityConfig {
                     "/css/**", "/js/**", "/images/**", "/error"
                 ).permitAll()
 
-                .requestMatchers("/profissionais/**").permitAll()
-
-                .requestMatchers("/consultas/pagina").authenticated()
-
                 // Páginas e APIs de gestão: só profissionais (dados clínicos).
-                .requestMatchers("/pacientes/**", "/quartos/**",
-                    "/internacoes/**", "/procedimentos/**").hasRole("DOUTOR")
-
-                // TODO: liberado só para testar a API (como /profissionais).
-                .requestMatchers("/consultas/**").permitAll()
+                .requestMatchers("/profissionais/**", "/pacientes/**", "/quartos/**",
+                    "/internacoes/**", "/procedimentos/**", "/consultas/**").hasRole("DOUTOR")
 
                 .requestMatchers("/perfil/paciente", "/perfil/paciente/**").hasRole("PACIENTE")
                 .requestMatchers("/perfil/doutor").hasRole("DOUTOR")

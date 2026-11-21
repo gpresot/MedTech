@@ -23,5 +23,13 @@ public interface ProfissionalRepository extends JpaRepository<Profissional, Long
 
     boolean existsByCrm(String crm);
 
+    boolean existsByEmail(String email);
+
+    boolean existsByCpf(String cpf);
+
+    boolean existsByEmailAndIdNot(String email, Long id);
+
+    boolean existsByCpfAndIdNot(String cpf, Long id);
+
     boolean existsByCrmAndIdNot(String crm, Long id);
 }

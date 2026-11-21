@@ -17,6 +17,7 @@ import com.example.MedTech.exception.RecursoNaoEncontradoException;
 import com.example.MedTech.exception.RegraNegocioException;
 import com.example.MedTech.service.HistoricoMedicoService;
 import com.example.MedTech.service.PacienteService;
+import com.example.MedTech.util.AgendaConsultas;
 
 /**
  * Página de perfil do paciente logado. Tudo é buscado pelo e-mail da sessão,
@@ -47,8 +48,13 @@ public class PacienteViewController {
             return "redirect:/perfil/paciente/completar";
         }
 
+        var historico = historicoService.consultar(paciente.id());
+        AgendaConsultas agenda = AgendaConsultas.de(historico.consultas());
+
         model.addAttribute("paciente", paciente);
-        model.addAttribute("historico", historicoService.consultar(paciente.id()));
+        model.addAttribute("historico", historico);
+        model.addAttribute("proximasConsultas", agenda.proximas());
+        model.addAttribute("consultasAnteriores", agenda.anteriores());
         model.addAttribute("paginaAtual", "perfil");
 
         return "perfil-paciente";

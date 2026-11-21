@@ -155,6 +155,11 @@ const ROTULOS = {
     EM_ATENDIMENTO: "Em atendimento",
     CONCLUIDA: "Concluída",
     CANCELADA: "Cancelada",
+    // Prioridade de emergência
+    BAIXA: "Baixa",
+    MODERADA: "Moderada",
+    ALTA: "Alta",
+    CRITICA: "Crítica",
     // Tipo de cirurgia
     ELETIVA: "Eletiva",
     URGENCIA: "Urgência",

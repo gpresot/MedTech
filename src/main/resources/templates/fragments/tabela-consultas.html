@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+    <!--
+        Tabela de consultas usada nos perfis.
+        consultas: lista de ConsultaResponse
+        quem: 'paciente' (mostra o paciente) ou 'profissional' (mostra o profissional)
+        vazio: texto quando não há consultas
+    -->
+    <div th:fragment="tabela(consultas, quem, vazio)">
+
+        <p class="perfil-vazio" th:if="${#lists.isEmpty(consultas)}" th:text="${vazio}"></p>
+
+        <div class="perfil-tabela-container" th:unless="${#lists.isEmpty(consultas)}">
+            <table class="perfil-tabela">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th th:text="${quem == 'paciente' ? 'Paciente' : 'Profissional'}">Pessoa</th>
+                        <th>Tipo</th>
+                        <th>Motivo</th>
+                        <th>Situação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="c : ${consultas}">
+                        <td th:text="${#temporals.format(c.data(), 'dd/MM/yyyy')}"></td>
+                        <td th:text="${#temporals.format(c.horario(), 'HH:mm')}"></td>
+                        <td th:text="${quem == 'paciente' ? c.pacienteNome() : c.profissionalNome()}"></td>
+                        <td th:text="${@rotulos.de(c.tipo())}"></td>
+                        <td th:text="${c.motivo()}"></td>
+                        <td><span class="perfil-status" th:text="${@rotulos.de(c.status())}"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

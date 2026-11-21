@@ -83,7 +83,7 @@
                 <div class="perfil-info">
                     <span>CPF</span>
 
-                    <strong th:text="${paciente.cpf().substring(0,3) + '.' + paciente.cpf().substring(3,6) + '.' + paciente.cpf().substring(6,9) + '-' + paciente.cpf().substring(9)}">
+                    <strong th:text="${paciente.cpfFormatado()}">
                         CPF do paciente
                     </strong>
                 </div>
@@ -194,35 +194,13 @@
                 Minhas consultas
             </h2>
 
-            <p class="perfil-vazio" th:if="${#lists.isEmpty(historico.consultas())}">
-                Nenhuma consulta registrada.
-            </p>
+            <h3 class="perfil-subtitulo">Próximas e em andamento</h3>
 
-            <div class="perfil-tabela-container" th:unless="${#lists.isEmpty(historico.consultas())}">
-                <table class="perfil-tabela">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Horário</th>
-                            <th>Profissional</th>
-                            <th>Motivo</th>
-                            <th>Situação</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="c : ${historico.consultas()}">
-                            <td th:text="${#temporals.format(c.data(), 'dd/MM/yyyy')}"></td>
-                            <td th:text="${#temporals.format(c.horario(), 'HH:mm')}"></td>
-                            <td th:text="${c.profissionalNome()}"></td>
-                            <td th:text="${c.motivo()}"></td>
-                            <td>
-                                <span class="perfil-status"
-                                      th:text="${@rotulos.de(c.status())}"></span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <div th:replace="~{fragments/tabela-consultas :: tabela(${proximasConsultas}, 'profissional', 'Nenhuma consulta agendada.')}"></div>
+
+            <h3 class="perfil-subtitulo">Encerradas</h3>
+
+            <div th:replace="~{fragments/tabela-consultas :: tabela(${consultasAnteriores}, 'profissional', 'Nenhuma consulta encerrada.')}"></div>
 
         </section>
 
