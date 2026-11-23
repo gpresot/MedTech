@@ -143,7 +143,7 @@ function formatarCpf(cpf) {
 }
 
 const ROTULOS = {
-    // Status de atendimento (consulta, emergência e procedimento cirúrgico)
+    // Status de atendimento
     AGENDADO: "Agendado",
     CONFIRMADO: "Confirmado",
     EM_ANDAMENTO: "Em andamento",
@@ -155,19 +155,31 @@ const ROTULOS = {
     EM_ATENDIMENTO: "Em atendimento",
     CONCLUIDA: "Concluída",
     CANCELADA: "Cancelada",
+
     // Prioridade de emergência
     BAIXA: "Baixa",
     MODERADA: "Moderada",
     ALTA: "Alta",
     CRITICA: "Crítica",
+
+    // Modalidades de atendimento e categorias de profissional
+    ROTINA: "Rotina",
+    ESPECIALIZADA: "Especializada",
+    CIRURGIA: "Cirurgia",
+    CLINICO: "Clínico geral",
+    ESPECIALISTA: "Especialista",
+    CIRURGIAO: "Cirurgião",
+
     // Tipo de cirurgia
     ELETIVA: "Eletiva",
     URGENCIA: "Urgência",
     EMERGENCIA: "Emergência",
+
     // Tipo de quarto
     ENFERMARIA: "Enfermaria",
     APARTAMENTO: "Apartamento",
     UTI: "UTI",
+
     // Quarto (situação)
     DISPONIVEL: "Disponível",
     OCUPADO: "Lotado",

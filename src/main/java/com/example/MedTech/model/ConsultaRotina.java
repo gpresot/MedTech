@@ -8,7 +8,7 @@ import com.example.MedTech.enums.StatusConsulta;
 import com.example.MedTech.enums.TipoConsulta;
 import com.example.MedTech.exception.RegraNegocioException;
 
-import org.hibernate.Hibernate;
+import com.example.MedTech.validation.CompatibilidadeProfissional;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -34,9 +34,7 @@ public class ConsultaRotina extends Consulta {
     @Override
     public void validarAtendimento() {
         super.validarAtendimento();
-        if (!(Hibernate.unproxy(getProfissional()) instanceof MedicoClinicoGeral)) {
-            throw new RegraNegocioException("Consultas de rotina exigem um médico clínico geral.");
-        }
+        CompatibilidadeProfissional.exigirClinicoGeral(getProfissional());
     }
 
     @Override

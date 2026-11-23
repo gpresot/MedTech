@@ -1,0 +1,91 @@
+/* ========================================
+   PÁGINA DE INDICADORES
+   Complementa gestao.css (cartões e barras)
+======================================== */
+
+.cartoes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 16px;
+}
+
+.cartao {
+    background-color: #F8FAFC;
+    border: 1px solid #E5EAF0;
+    border-radius: 10px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cartao-total {
+    background-color: #E8F3F9;
+    border-color: #C6E0EE;
+}
+
+.cartao-titulo {
+    color: #526477;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.cartao-valor {
+    color: #005380;
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.cartao-detalhe {
+    color: #526477;
+    font-size: 13px;
+}
+
+/* ---------- BARRAS ---------- */
+
+.barra {
+    width: 100%;
+    height: 8px;
+    background-color: #E5EAF0;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.barra > span {
+    display: block;
+    height: 100%;
+    background-color: #0A7BB5;
+    border-radius: 999px;
+}
+
+.barra-rotina > span { background-color: #0A7BB5; }
+.barra-especializada > span { background-color: #5B6EE1; }
+.barra-emergencia > span { background-color: #D64545; }
+.barra-cirurgia > span { background-color: #1B8A5A; }
+
+/* ---------- TABELA POR PROFISSIONAL ---------- */
+
+.celula-total {
+    min-width: 150px;
+}
+
+.celula-total strong {
+    display: block;
+    color: #00334F;
+    margin-bottom: 6px;
+}
+
+.filtro-marcar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #00334F;
+    font-size: 14px;
+}
+
+.filtro-marcar input {
+    width: auto;
+}

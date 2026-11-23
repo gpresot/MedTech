@@ -16,6 +16,8 @@ import com.example.MedTech.enums.TipoCirurgia;
 import com.example.MedTech.exception.RecursoNaoEncontradoException;
 import com.example.MedTech.exception.RegraNegocioException;
 import com.example.MedTech.model.Cirurgiao;
+import com.example.MedTech.model.Profissional;
+import com.example.MedTech.validation.CompatibilidadeProfissional;
 import com.example.MedTech.model.Internacao;
 import com.example.MedTech.model.ProcedimentoCirurgico;
 import com.example.MedTech.repository.CirurgiaoRepository;
@@ -96,16 +98,12 @@ public class ProcedimentoCirurgicoService {
                     "A cirurgia exige que o paciente tenha uma internação ativa.");
         }
 
-        // Regra 1 (unproxy: o Hibernate pode devolver um proxy da classe base)
-        Object profissional = profissionalRepository.findById(req.cirurgiaoId())
-                .map(Hibernate::unproxy)
+        // Regra 1: só cirurgião (validação padronizada, trata proxy do Hibernate)
+        Profissional profissional = profissionalRepository.findById(req.cirurgiaoId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException(
                         "Profissional " + req.cirurgiaoId() + " não encontrado."));
 
-        if (!(profissional instanceof Cirurgiao cirurgiao)) {
-            throw new RegraNegocioException(
-                    "Apenas profissionais do tipo Cirurgião podem ser responsáveis por cirurgias.");
-        }
+        Cirurgiao cirurgiao = CompatibilidadeProfissional.exigirCirurgiao(profissional);
 
         // Regra 3
         if (!req.dataHora().isAfter(LocalDateTime.now())) {

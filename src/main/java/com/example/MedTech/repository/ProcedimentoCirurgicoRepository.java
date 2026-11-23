@@ -22,6 +22,10 @@ public interface ProcedimentoCirurgicoRepository
 
     List<ProcedimentoCirurgico> findByCirurgiaoIdOrderByDataHoraDesc(Long cirurgiaoId);
 
+    /** Usado pelos indicadores: traz o cirurgião junto, sem uma consulta por linha. */
+    @Query("SELECT p FROM ProcedimentoCirurgico p JOIN FETCH p.cirurgiao")
+    List<ProcedimentoCirurgico> findAllComCirurgiao();
+
     boolean existsByCirurgiaoId(Long cirurgiaoId);
 
     boolean existsByInternacaoIdAndStatusIn(Long internacaoId,

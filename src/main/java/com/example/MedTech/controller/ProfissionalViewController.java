@@ -33,6 +33,16 @@ public class ProfissionalViewController {
         return "profissionais";
     }
 
+    // ---------- INDICADORES DE ATENDIMENTO ----------
+
+    @GetMapping("/indicadores/pagina")
+    public String indicadores(Model model) {
+
+        model.addAttribute("paginaAtual", "indicadores");
+
+        return "indicadores";
+    }
+
     // ---------- EDIÇÃO DE PROFISSIONAL ----------
 
     @GetMapping("/editar/{id}")

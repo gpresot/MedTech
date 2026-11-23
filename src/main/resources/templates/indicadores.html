@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Indicadores - MedTech</title>
+
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/gestao.css}">
+    <link rel="stylesheet" th:href="@{/css/indicadores.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/icon.png}">
+</head>
+
+<body>
+
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="container">
+
+        <header class="cabecalho">
+            <h1>Indicadores de atendimento</h1>
+            <p>Quantidade de atendimentos por modalidade e por profissional</p>
+        </header>
+
+        <!-- FILTROS -->
+        <section class="caixa">
+            <h2>Filtros</h2>
+
+            <form id="formFiltros" class="form-grid">
+
+                <div class="campo">
+                    <label for="de">De</label>
+                    <input type="date" id="de">
+                </div>
+
+                <div class="campo">
+                    <label for="ate">Até</label>
+                    <input type="date" id="ate">
+                </div>
+
+                <div class="campo">
+                    <label class="filtro-marcar" for="apenasConcluidos">
+                        <input type="checkbox" id="apenasConcluidos">
+                        Contar só atendimentos concluídos
+                    </label>
+                    <small class="cartao-detalhe">
+                        Sem marcar, entram todos os atendimentos, menos cancelados e faltas.
+                    </small>
+                </div>
+
+                <div class="campo campo-acoes">
+                    <button type="submit" class="botao">Aplicar</button>
+                    <button type="button" id="limpar" class="botao botao-secundario">Limpar</button>
+                </div>
+            </form>
+
+            <p id="mensagem" class="mensagem"></p>
+        </section>
+
+        <!-- POR MODALIDADE -->
+        <section class="caixa">
+            <h2>Atendimentos por modalidade</h2>
+            <div id="cartoesModalidade" class="cartoes"></div>
+        </section>
+
+        <!-- POR PROFISSIONAL -->
+        <section class="caixa">
+            <h2>Atendimentos por profissional</h2>
+            <div id="listaProfissionais"></div>
+        </section>
+
+    </main>
+
+    <script th:src="@{/js/api.js}"></script>
+    <script>
+        const BASE = "/profissionais/indicadores";
+
+        const formFiltros = document.getElementById("formFiltros");
+        const campoDe = document.getElementById("de");
+        const campoAte = document.getElementById("ate");
+        const campoConcluidos = document.getElementById("apenasConcluidos");
+        const mensagem = document.getElementById("mensagem");
+
+        const MODALIDADES = ["ROTINA", "ESPECIALIZADA", "EMERGENCIA", "CIRURGIA"];
+
+        function consulta() {
+            const params = new URLSearchParams();
+
+            if (campoDe.value) params.set("de", campoDe.value);
+            if (campoAte.value) params.set("ate", campoAte.value);
+            if (campoConcluidos.checked) params.set("apenasConcluidos", "true");
+
+            const texto = params.toString();
+            return texto ? "?" + texto : "";
+        }
+
+        function percentual(parte, total) {
+            return total > 0 ? Math.round((parte / total) * 100) : 0;
+        }
+
+        function barra(modalidade, pct) {
+            return el("div", { class: "barra barra-" + modalidade.toLowerCase() },
+                el("span", { style: `width: ${pct}%` }));
+        }
+
+        function desenharModalidades(dados) {
+            const total = dados.reduce((soma, d) => soma + d.total, 0);
+
+            const cartoes = [
+                el("div", { class: "cartao cartao-total" },
+                    el("span", { class: "cartao-titulo" }, "Total"),
+                    el("span", { class: "cartao-valor" }, total),
+                    el("span", { class: "cartao-detalhe" }, "atendimentos no filtro"))
+            ];
+
+            for (const item of dados) {
+                const pct = percentual(item.total, total);
+
+                cartoes.push(el("div", { class: "cartao" },
+                    el("span", { class: "cartao-titulo" }, rotulo(item.modalidade)),
+                    el("span", { class: "cartao-valor" }, item.total),
+                    barra(item.modalidade, pct),
+                    el("span", { class: "cartao-detalhe" }, `${pct}% do total`)));
+            }
+
+            document.getElementById("cartoesModalidade").replaceChildren(...cartoes);
+        }
+
+        function desenharProfissionais(dados) {
+            const maior = dados.reduce((m, d) => Math.max(m, d.total), 0);
+
+            desenharLista(
+                document.getElementById("listaProfissionais"),
+                "Nenhum atendimento encontrado para o filtro.",
+                ["Profissional", "Categoria", "Total", ...MODALIDADES.map(rotulo)],
+                dados.map(d => [
+                    d.nome,
+                    rotulo(d.tipo),
+                    el("div", { class: "celula-total" },
+                        el("strong", {}, d.total),
+                        barra("rotina", percentual(d.total, maior))),
+                    ...MODALIDADES.map(m => d.porModalidade[m] ?? 0)
+                ])
+            );
+        }
+
+        async function carregar() {
+            if (campoDe.value && campoAte.value && campoDe.value > campoAte.value) {
+                mostrarMensagem(mensagem, "A data inicial não pode ser depois da data final.", "erro");
+                return;
+            }
+
+            mostrarMensagem(mensagem, "Carregando...", "");
+
+            try {
+                const q = consulta();
+                const [modalidades, profissionais] = await Promise.all([
+                    api(`${BASE}/atendimentos-por-modalidade${q}`),
+                    api(`${BASE}/atendimentos-por-profissional${q}`)
+                ]);
+
+                desenharModalidades(modalidades);
+                desenharProfissionais(profissionais);
+                mostrarMensagem(mensagem, "", "");
+
+            } catch (erro) {
+                mostrarMensagem(mensagem, erro.message, "erro");
+            }
+        }
+
+        formFiltros.addEventListener("submit", (evento) => {
+            evento.preventDefault();
+            carregar();
+        });
+
+        document.getElementById("limpar").addEventListener("click", () => {
+            formFiltros.reset();
+            carregar();
+        });
+
+        carregar();
+    </script>
+
+</body>
+
+</html>

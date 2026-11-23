@@ -7,7 +7,7 @@ import com.example.MedTech.enums.TipoConsulta;
 import com.example.MedTech.enums.Especialidade;
 import com.example.MedTech.exception.RegraNegocioException;
 
-import org.hibernate.Hibernate;
+import com.example.MedTech.validation.CompatibilidadeProfissional;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -36,14 +36,7 @@ public class ConsultaEspecializada extends Consulta {
         if (especialidade == null) {
             throw new RegraNegocioException("Informe a especialidade da consulta.");
         }
-        Object profissional = Hibernate.unproxy(getProfissional());
-        if (!(profissional instanceof MedicoEspecialista)) {
-            throw new RegraNegocioException("A consulta especializada exige um médico especialista.");
-        }
-        MedicoEspecialista especialista = (MedicoEspecialista) profissional;
-        if (especialista.getEspecialidade() != especialidade) {
-            throw new RegraNegocioException("A especialidade do médico não corresponde à consulta.");
-        }
+        CompatibilidadeProfissional.exigirEspecialista(getProfissional(), especialidade);
     }
 
     public Especialidade getEspecialidade() {

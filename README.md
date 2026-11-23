@@ -11,7 +11,7 @@ Sistema hospitalar desenvolvido como trabalho prático da disciplina **Programa�
 
 ## Sobre o projeto
 
-O MedTech gerencia o fluxo de um hospital: cadastro de pacientes e profissionais, histórico médico, controle de quartos, internações e procedimentos cirúrgicos. A modelagem está na pasta [`docs/`](docs): diagrama de classes atualizado (`Diagrama_de_Classes_Sprint_2.pdf`, com o fonte Mermaid em `diagrama-classes-sprint2.mmd`), o resumo da Sprint 2 em [`docs/SPRINT2.md`](docs/SPRINT2.md) e, em `docs/sprint1/`, o material da Sprint 1.
+O MedTech gerencia o fluxo de um hospital: cadastro de pacientes e profissionais, histórico médico, controle de quartos, internações e procedimentos cirúrgicos. A modelagem está na pasta [`docs/`](docs): diagrama de classes atualizado (`Diagrama_de_Classes_Sprint_2.pdf`, com o fonte Mermaid em `diagrama-classes-sprint2.mmd`), o resumo da Sprint 2 em [`docs/SPRINT2.md`](docs/SPRINT2.md), o módulo de indicadores e compatibilidade em [`docs/SPRINT3.md`](docs/SPRINT3.md) (diagrama `Diagrama_de_Classes_Sprint_3.pdf`, fonte em `diagrama-classes-sprint3.mmd`) e, em `docs/sprint1/`, o material da Sprint 1.
 
 ## Tecnologias
 
@@ -71,6 +71,16 @@ Erros: `400` validação, `404` recurso não encontrado, `409` violação de reg
 
 ### `/profissionais`
 `GET /` · `GET /{id}` · `POST /` · `PUT /{id}` · `DELETE /{id}` (bloqueado se houver consultas, internações ou cirurgias) · `GET /especialidade/{especialidade}` · `GET /{id}/procedimentos[?status=]` (procedimentos do cirurgião: data, paciente e descrição). As respostas incluem `tipo` (`CLINICO`, `ESPECIALISTA`, `CIRURGIAO`).
+
+#### `/profissionais/indicadores`
+Indicadores de atendimento (consultas e cirurgias), só para doutores. Parâmetros opcionais: `de`, `ate` (`AAAA-MM-DD`) e `apenasConcluidos` (padrão `false`: ignora cancelados e faltas).
+
+| Método | Rota | Descrição |
+| ------ | ---- | --------- |
+| GET | `/profissionais/indicadores/atendimentos-por-profissional` | Total por profissional, com o detalhe por modalidade |
+| GET | `/profissionais/indicadores/atendimentos-por-profissional/{id}` | Mesmo indicador para um profissional (zerado se não houver atendimentos) |
+| GET | `/profissionais/indicadores/atendimentos-por-modalidade` | Total por `ROTINA`, `ESPECIALIZADA`, `EMERGENCIA` e `CIRURGIA` |
+| GET | `/profissionais/indicadores/pagina` | Tela com os indicadores (menu **Indicadores**) |
 
 ### `/consultas`
 `GET /[?status=&tipo=]` · `GET /{id}` · `GET /paciente/{id}` · `POST /` · `PUT /{id}` · `DELETE /{id}` (cancela) · `POST /{id}/confirmar` · `/iniciar` · `/nao-compareceu` · `/concluir` · `/encaminhar`
@@ -158,4 +168,5 @@ A página HTML de internações fica em `/internacoes/pagina`.
 
 ## Pendências
 
-- `/profissionais/**` e `/consultas/**` ainda estão liberados sem login (ver `SecurityConfig`); restringir antes de uso real.
+- O cadastro de doutor é aberto a qualquer pessoa; defina `CODIGO_CONVITE_DOUTOR` para exigir um código de convite.
+- A senha do banco não deve ficar escrita no `application.properties`; use `DB_PASSWORD`.

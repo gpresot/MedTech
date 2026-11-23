@@ -52,6 +52,11 @@
                         Quartos
                     </a>
 
+                    <a th:href="@{/profissionais/indicadores/pagina}"
+                        th:classappend="${paginaAtual == 'indicadores'} ? ' ativo' : ''">
+                        Indicadores
+                    </a>
+
                 </th:block>
 
                 <a th:if="${logado == true}" th:href="@{${perfilUrl}}"

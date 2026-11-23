@@ -26,6 +26,10 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
 
     List<Consulta> findByStatus(StatusConsulta status);
 
+    /** Usado pelos indicadores: traz o profissional junto, sem uma consulta por linha. */
+    @Query("SELECT c FROM Consulta c JOIN FETCH c.profissional")
+    List<Consulta> findAllComProfissional();
+
     boolean existsByProfissionalId(Long profissionalId);
 
     @Query("SELECT COUNT(c) FROM Consulta c WHERE c.profissional.id = :profissionalId "
